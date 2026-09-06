@@ -28,19 +28,52 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ── Google Drive URL Converter ──────────────────────────────── */
+/* ── Google Drive URL Converter & Fallback Handlers ──────────── */
+function getDriveId(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  const patterns = [
+    /\/file\/d\/([a-zA-Z0-9_-]+)/,
+    /[?&]id=([a-zA-Z0-9_-]+)/,
+    /\/d\/([a-zA-Z0-9_-]+)/
+  ];
+  for (const p of patterns) {
+    const m = raw.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function isDriveUrl(url) {
+  return typeof url === 'string' && (
+    url.includes('drive.google.com') ||
+    url.includes('googleusercontent.com') ||
+    url.includes('docs.google.com')
+  );
+}
+
 function convertDriveUrl(raw, type = 'image') {
-  if (!raw || raw === '#' || !raw.includes('drive.google.com')) return raw;
-  let id = null;
-  const patterns = [/\/file\/d\/([^/?#]+)/, /[?&]id=([^&]+)/, /\/d\/([^/?#]+)/];
-  for (const p of patterns) { const m = raw.match(p); if (m) { id = m[1]; break; } }
+  if (!raw || raw === '#') return raw;
+  const id = getDriveId(raw);
   if (!id) return raw;
-  if (type === 'image') return `https://drive.google.com/uc?export=view&id=${id}`;
+  // Google direct CDN endpoint for public images - serves 200 OK directly, avoiding 303 cross-origin redirects/blocks
+  if (type === 'image') return `https://lh3.googleusercontent.com/d/${id}`;
   if (type === 'pdf')   return `https://drive.google.com/file/d/${id}/preview`;
   return raw;
 }
 
-function isDriveUrl(url) { return url && url.includes('drive.google.com'); }
+function handleDriveImgError(img, driveId) {
+  if (!img) return;
+  const id = driveId || getDriveId(img.getAttribute('data-raw-src') || img.src);
+  if (id && !img.dataset.triedThumb) {
+    img.dataset.triedThumb = '1';
+    img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
+    return;
+  }
+  if (!img.dataset.triedFallback) {
+    img.dataset.triedFallback = '1';
+    img.src = 'assets/images/pm_shri.png';
+  }
+}
 
 /* ── Theme ───────────────────────────────────────────────────── */
 function initTheme() {
@@ -273,6 +306,8 @@ function renderSchoolInfo(info) {
   const campusImg = document.getElementById('aboutCampusImg');
   if (campusImg) {
     const cImg = info.campusImage || 'assets/images/kv_campus.jpg';
+    const driveId = isDriveUrl(cImg) ? getDriveId(cImg) : null;
+    campusImg.onerror = () => { handleDriveImgError(campusImg, driveId); };
     campusImg.src = isDriveUrl(cImg) ? convertDriveUrl(cImg, 'image') : cImg;
   }
 
@@ -327,7 +362,11 @@ function renderPrincipalMessage(p) {
   const q = document.getElementById('principalQuote');
   if (q) q.textContent = `"${p.quote}"`;
   const img = document.getElementById('principalImg');
-  if (img) img.src = isDriveUrl(p.image) ? convertDriveUrl(p.image, 'image') : (p.image || 'assets/images/principal.png');
+  if (img) {
+    const driveId = isDriveUrl(p.image) ? getDriveId(p.image) : null;
+    img.onerror = () => { handleDriveImgError(img, driveId); };
+    img.src = isDriveUrl(p.image) ? convertDriveUrl(p.image, 'image') : (p.image || 'assets/images/principal.png');
+  }
   const content = document.getElementById('principalContent');
   if (content) content.innerHTML = p.content.split('\n\n').map(para => `<p style="margin-bottom:1rem">${para.replace(/\n/g,'<br>')}</p>`).join('');
 }
@@ -371,9 +410,11 @@ function renderInitiatives(list) {
   const el = document.getElementById('initiativesContainer');
   if (!el || !list) return;
   el.innerHTML = list.map(i => {
-    const imgSrc = isDriveUrl(i.image) ? convertDriveUrl(i.image, 'image') : (i.image || 'assets/images/pm_shri.png');
+    const isDrive = isDriveUrl(i.image);
+    const driveId = isDrive ? getDriveId(i.image) : null;
+    const imgSrc = isDrive ? convertDriveUrl(i.image, 'image') : (i.image || 'assets/images/pm_shri.png');
     return `<div class="card">
-      <div class="card-img-wrapper"><img src="${imgSrc}" class="card-img" alt="${i.title}"></div>
+      <div class="card-img-wrapper"><img src="${imgSrc}" class="card-img" alt="${i.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" loading="lazy"></div>
       <div class="card-body">
         <span class="card-badge"><i class="fas ${i.icon || 'fa-star'}"></i> ${i.category}</span>
         <h3 class="card-title">${i.title}</h3>
@@ -423,9 +464,13 @@ function renderGallery(list, cat = 'All') {
   if (!grid) return;
   const items = cat === 'All' ? list : list.filter(i => i.category === cat);
   grid.innerHTML = items.map(item => {
-    const src = isDriveUrl(item.srcUrl) ? convertDriveUrl(item.srcUrl, 'image') : (item.srcUrl || item.image || '');
-    return `<div class="gallery-item" onclick="openViewer('${item.srcUrl}','${item.title}','${item.caption}','${item.type || 'photo'}')">
-      <img src="${src}" alt="${item.title}">
+    const isDrive = isDriveUrl(item.srcUrl);
+    const driveId = isDrive ? getDriveId(item.srcUrl) : null;
+    const src = isDrive ? convertDriveUrl(item.srcUrl, 'image') : (item.srcUrl || item.image || '');
+    const safeTitle = (item.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const safeCaption = (item.caption || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return `<div class="gallery-item" onclick="openViewer('${item.srcUrl}','${safeTitle}','${safeCaption}','${item.type || 'photo'}')">
+      <img src="${src}" alt="${item.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" loading="lazy">
       <div class="gallery-overlay">
         <span style="font-size:.75rem;color:var(--accent-gold);font-weight:700">${item.category}</span>
         <div class="gallery-caption">${item.title}</div>
@@ -485,6 +530,8 @@ function openViewer(rawUrl, title, caption, type) {
   if (isPdf) {
     ifrEl.src = isDriveUrl(rawUrl) ? convertDriveUrl(rawUrl, 'pdf') : rawUrl;
   } else {
+    const driveId = isDriveUrl(rawUrl) ? getDriveId(rawUrl) : null;
+    imgEl.onerror = () => { handleDriveImgError(imgEl, driveId); };
     imgEl.src = isDriveUrl(rawUrl) ? convertDriveUrl(rawUrl, 'image') : rawUrl;
   }
   modal.classList.add('active');
@@ -980,10 +1027,12 @@ function renderAdminGalleryList(list) {
   if (!el) return;
   if (!list.length) { el.innerHTML = `<p class="text-muted">No gallery items.</p>`; return; }
   el.innerHTML = list.map(g => {
-    const preview = isDriveUrl(g.srcUrl) ? convertDriveUrl(g.srcUrl, 'image') : (g.srcUrl || '');
+    const isDrive = isDriveUrl(g.srcUrl);
+    const driveId = isDrive ? getDriveId(g.srcUrl) : null;
+    const preview = isDrive ? convertDriveUrl(g.srcUrl, 'image') : (g.srcUrl || '');
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border-color);gap:1rem">
       <div style="display:flex;gap:1rem;align-items:center">
-        ${preview ? `<img src="${preview}" style="width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">` : ''}
+        ${preview ? `<img src="${preview}" onerror="handleDriveImgError(this, '${driveId || ''}')" style="width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">` : ''}
         <div>
           <strong>${g.title}</strong>
           <p style="font-size:.8rem;color:var(--text-muted)">${g.category} • ${g.type || 'photo'}</p>
@@ -1395,8 +1444,10 @@ function previewDriveInput(inputId, previewId) {
   const prev = document.getElementById(previewId);
   if (!prev) return;
   if (!raw || raw === '#') { prev.style.display = 'none'; return; }
-  const src = isDriveUrl(raw) ? convertDriveUrl(raw, 'image') : raw;
+  const isDrive = isDriveUrl(raw);
+  const driveId = isDrive ? getDriveId(raw) : null;
+  const src = isDrive ? convertDriveUrl(raw, 'image') : raw;
   prev.src = src;
   prev.style.display = 'block';
-  prev.onerror = () => { prev.style.display = 'none'; };
+  prev.onerror = () => { handleDriveImgError(prev, driveId); };
 }

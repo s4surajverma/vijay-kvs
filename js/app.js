@@ -55,15 +55,23 @@ function convertDriveUrl(raw, type = 'image') {
   if (!raw || raw === '#') return raw;
   const id = getDriveId(raw);
   if (!id) return raw;
-  // Google direct CDN endpoint for public images - serves 200 OK directly, avoiding 303 cross-origin redirects/blocks
-  if (type === 'image') return `https://lh3.googleusercontent.com/d/${id}`;
-  if (type === 'pdf')   return `https://drive.google.com/file/d/${id}/preview`;
-  return raw;
+  if (type === 'pdf') return `https://drive.google.com/file/d/${id}/preview`;
+  // Use first-party server proxy when running on an HTTP/HTTPS web server (bypasses adblockers, Brave Shields, & 303 redirects)
+  if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+    return `/api/proxy-image?id=${id}`;
+  }
+  // Google direct CDN fallback
+  return `https://lh3.googleusercontent.com/d/${id}`;
 }
 
 function handleDriveImgError(img, driveId) {
   if (!img) return;
   const id = driveId || getDriveId(img.getAttribute('data-raw-src') || img.src);
+  if (id && !img.dataset.triedLh3) {
+    img.dataset.triedLh3 = '1';
+    img.src = `https://lh3.googleusercontent.com/d/${id}`;
+    return;
+  }
   if (id && !img.dataset.triedThumb) {
     img.dataset.triedThumb = '1';
     img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
@@ -470,7 +478,7 @@ function renderGallery(list, cat = 'All') {
     const safeTitle = (item.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const safeCaption = (item.caption || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     return `<div class="gallery-item" onclick="openViewer('${item.srcUrl}','${safeTitle}','${safeCaption}','${item.type || 'photo'}')">
-      <img src="${src}" alt="${item.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" loading="lazy">
+      <img src="${src}" alt="${item.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" referrerpolicy="no-referrer" loading="lazy">
       <div class="gallery-overlay">
         <span style="font-size:.75rem;color:var(--accent-gold);font-weight:700">${item.category}</span>
         <div class="gallery-caption">${item.title}</div>
@@ -1032,7 +1040,7 @@ function renderAdminGalleryList(list) {
     const preview = isDrive ? convertDriveUrl(g.srcUrl, 'image') : (g.srcUrl || '');
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border-color);gap:1rem">
       <div style="display:flex;gap:1rem;align-items:center">
-        ${preview ? `<img src="${preview}" onerror="handleDriveImgError(this, '${driveId || ''}')" style="width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">` : ''}
+        ${preview ? `<img src="${preview}" onerror="handleDriveImgError(this, '${driveId || ''}')" referrerpolicy="no-referrer" style="width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">` : ''}
         <div>
           <strong>${g.title}</strong>
           <p style="font-size:.8rem;color:var(--text-muted)">${g.category} • ${g.type || 'photo'}</p>
@@ -1440,14 +1448,61 @@ function _toast(msg, type = 'success') {
 
 /* ── Drive URL Preview Helper ─────────────────────────────────── */
 function previewDriveInput(inputId, previewId) {
-  const raw = document.getElementById(inputId)?.value;
+  const input = document.getElementById(inputId);
+  const raw = input?.value?.trim();
   const prev = document.getElementById(previewId);
   if (!prev) return;
-  if (!raw || raw === '#') { prev.style.display = 'none'; return; }
+
+  if (!raw || raw === '#') {
+    prev.style.display = 'none';
+    _toast('Please enter an image URL first.', 'error');
+    return;
+  }
+
+  // Create or reuse feedback message element
+  let fb = document.getElementById(previewId + '_fb');
+  if (!fb) {
+    fb = document.createElement('div');
+    fb.id = previewId + '_fb';
+    fb.style.marginTop = '0.5rem';
+    fb.style.fontSize = '0.85rem';
+    prev.parentNode.insertBefore(fb, prev.nextSibling);
+  }
+  fb.innerHTML = `<span style="color:var(--primary);font-weight:600"><i class="fas fa-spinner fa-spin"></i> Fetching image preview...</span>`;
+
   const isDrive = isDriveUrl(raw);
   const driveId = isDrive ? getDriveId(raw) : null;
   const src = isDrive ? convertDriveUrl(raw, 'image') : raw;
-  prev.src = src;
+
+  prev.dataset.triedLh3 = '';
+  prev.dataset.triedThumb = '';
+  prev.dataset.triedFallback = '';
+  prev.setAttribute('referrerpolicy', 'no-referrer');
   prev.style.display = 'block';
-  prev.onerror = () => { handleDriveImgError(prev, driveId); };
+  prev.style.maxHeight = '180px';
+  prev.style.borderRadius = 'var(--radius-sm)';
+  prev.style.border = '2px solid var(--accent-gold)';
+  prev.style.objectFit = 'contain';
+  prev.style.background = '#f8f9fa';
+  prev.src = src;
+
+  prev.onload = () => {
+    if (fb) fb.innerHTML = `<span style="color:var(--accent-teal);font-weight:600"><i class="fas fa-check-circle"></i> Preview loaded successfully!</span>`;
+  };
+
+  prev.onerror = () => {
+    if (driveId && !prev.dataset.triedLh3) {
+      prev.dataset.triedLh3 = '1';
+      prev.src = `https://lh3.googleusercontent.com/d/${driveId}`;
+      return;
+    }
+    if (driveId && !prev.dataset.triedThumb) {
+      prev.dataset.triedThumb = '1';
+      prev.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+      return;
+    }
+    if (fb) {
+      fb.innerHTML = `<span style="color:var(--accent-crimson);line-height:1.4"><i class="fas fa-exclamation-triangle"></i> Image could not be loaded. Please ensure: <br>1. Google Drive permission is set to <strong>"Anyone with the link can view"</strong>.<br>2. If using Brave Browser, toggle <strong>Brave Shields OFF</strong> for this page. <a href="${raw}" target="_blank" style="color:var(--accent-blue);text-decoration:underline">Test link in new tab &rarr;</a></span>`;
+    }
+  };
 }

@@ -39,9 +39,10 @@ const DB = (() => {
       const stored = localStorage.getItem(AUTH_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        const activePassword = (envPass && envPass !== 'kvs@2024') ? envPass : (parsed.password || envPass);
         return {
           username: envUser,
-          password: parsed.password || envPass,
+          password: activePassword,
           displayName: parsed.displayName || 'Site Administrator'
         };
       }
@@ -254,7 +255,20 @@ const DB = (() => {
     return false;
   }
 
-  /* ── Supabase Integration Methods ─────────────────────────── */
+  function _normalizeSupabaseUrl(rawUrl) {
+    if (!rawUrl) return '';
+    rawUrl = rawUrl.trim();
+    if (rawUrl.startsWith('postgresql://') || rawUrl.startsWith('postgres://')) {
+      const match = rawUrl.match(/postgres\.([a-z0-9_-]+):/i);
+      if (match) {
+        return `https://${match[1]}.supabase.co`;
+      }
+    }
+    if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+      rawUrl = 'https://' + rawUrl;
+    }
+    return rawUrl.replace(/\/+$/, '');
+  }
 
   /**
    * Retrieve configured Supabase credentials.
@@ -265,16 +279,16 @@ const DB = (() => {
 
     // 1. Primary: Render Environment variables via window.APP_CONFIG
     if (window.APP_CONFIG?.supabaseUrl && window.APP_CONFIG?.supabaseAnonKey) {
-      cfg.url = window.APP_CONFIG.supabaseUrl;
-      cfg.anonKey = window.APP_CONFIG.supabaseAnonKey;
+      cfg.url = _normalizeSupabaseUrl(window.APP_CONFIG.supabaseUrl);
+      cfg.anonKey = (window.APP_CONFIG.supabaseAnonKey || '').trim();
       cfg.source = 'Render Environment';
       return cfg;
     }
 
     // 2. Secondary: Static window.SUPABASE_CONFIG
     if (window.SUPABASE_CONFIG?.url && window.SUPABASE_CONFIG?.anonKey) {
-      cfg.url = window.SUPABASE_CONFIG.url;
-      cfg.anonKey = window.SUPABASE_CONFIG.anonKey;
+      cfg.url = _normalizeSupabaseUrl(window.SUPABASE_CONFIG.url);
+      cfg.anonKey = (window.SUPABASE_CONFIG.anonKey || '').trim();
       cfg.source = 'Static Config';
       return cfg;
     }
@@ -285,8 +299,8 @@ const DB = (() => {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.url && parsed.anonKey) {
-          cfg.url = parsed.url;
-          cfg.anonKey = parsed.anonKey;
+          cfg.url = _normalizeSupabaseUrl(parsed.url);
+          cfg.anonKey = (parsed.anonKey || '').trim();
           cfg.source = 'Local Storage';
           return cfg;
         }
@@ -315,7 +329,7 @@ const DB = (() => {
    * Initialize Supabase client and subscribe to real-time events.
    */
   async function initSupabase(url, anonKey, persist = true) {
-    const cleanUrl = (url || '').trim();
+    const cleanUrl = _normalizeSupabaseUrl(url);
     const cleanKey = (anonKey || '').trim();
 
     if (!cleanUrl || !cleanKey) {

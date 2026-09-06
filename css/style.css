@@ -1198,8 +1198,10 @@ button {
   transition: all 0.3s ease;
 }
 .login-modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  pointer-events: auto !important;
 }
 .login-modal-card {
   background: var(--bg-card);

@@ -64,12 +64,23 @@ const server = http.createServer((req, res) => {
 
   // Runtime public config endpoint
   if (pathname === '/api/config') {
+    function normalizeUrl(u) {
+      if (!u) return '';
+      u = u.trim();
+      if (u.startsWith('postgresql://') || u.startsWith('postgres://')) {
+        const m = u.match(/postgres\.([a-z0-9_-]+):/i);
+        if (m) return `https://${m[1]}.supabase.co`;
+      }
+      if (!u.startsWith('http://') && !u.startsWith('https://')) u = 'https://' + u;
+      return u.replace(/\/+$/, '');
+    }
+    const cleanUrl = normalizeUrl(process.env.SUPABASE_URL || '');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
-      supabaseUrl: process.env.SUPABASE_URL || '',
+      supabaseUrl: cleanUrl,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
       adminUsername: process.env.ADMIN_USERNAME || 'admin',
-      isConfigured: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY)
+      isConfigured: Boolean(cleanUrl && process.env.SUPABASE_ANON_KEY)
     }));
     return;
   }

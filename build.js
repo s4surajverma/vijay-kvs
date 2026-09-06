@@ -32,7 +32,24 @@ function loadEnvFile(filePath) {
 // Check for local .env
 loadEnvFile(path.join(__dirname, '.env'));
 
-const supabaseUrl     = (process.env.SUPABASE_URL || '').trim();
+function normalizeSupabaseUrl(rawUrl) {
+  if (!rawUrl) return '';
+  rawUrl = rawUrl.trim();
+  // If user pasted a postgres connection URI like postgresql://postgres.luadnsimzzapslufityh:...
+  if (rawUrl.startsWith('postgresql://') || rawUrl.startsWith('postgres://')) {
+    const match = rawUrl.match(/postgres\.([a-z0-9_-]+):/i);
+    if (match) {
+      return `https://${match[1]}.supabase.co`;
+    }
+  }
+  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+    rawUrl = 'https://' + rawUrl;
+  }
+  return rawUrl.replace(/\/+$/, '');
+}
+
+const rawSupabaseUrl  = (process.env.SUPABASE_URL || '').trim();
+const supabaseUrl     = normalizeSupabaseUrl(rawSupabaseUrl);
 const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
 const adminUsername   = (process.env.ADMIN_USERNAME || 'admin').trim();
 const adminPassword   = (process.env.ADMIN_PASSWORD || 'kvs@2024').trim();

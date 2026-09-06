@@ -9,6 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   checkExistingSession();
   renderAllSections();
   refreshCategoryDropdowns();
+
+  const navLogin = document.getElementById('navLoginBtn');
+  if (navLogin) {
+    navLogin.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleNavLoginClick();
+    });
+  }
+
   window.addEventListener('pm_shri_state_changed', () => {
     renderAllSections();
     if (Auth.isLoggedIn()) renderAdminDashboard();
@@ -71,13 +81,29 @@ function handleNavLoginClick() {
 
 /* ── Login Modal ─────────────────────────────────────────────── */
 function openLoginModal() {
-  document.getElementById('loginModal').classList.add('active');
-  document.getElementById('loginUsername').focus();
+  const m = document.getElementById('loginModal');
+  if (!m) return;
+  m.style.display = 'flex';
+  m.style.opacity = '1';
+  m.style.visibility = 'visible';
+  m.style.pointerEvents = 'auto';
+  m.classList.add('active');
+  setTimeout(() => {
+    const inp = document.getElementById('loginUsername');
+    if (inp) inp.focus();
+  }, 60);
   clearLoginError();
 }
 function closeLoginModal() {
-  document.getElementById('loginModal').classList.remove('active');
-  document.getElementById('loginForm').reset();
+  const m = document.getElementById('loginModal');
+  if (!m) return;
+  m.classList.remove('active');
+  m.style.opacity = '0';
+  m.style.visibility = 'hidden';
+  m.style.pointerEvents = 'none';
+  m.style.display = 'none';
+  const form = document.getElementById('loginForm');
+  if (form) form.reset();
   clearLoginError();
 }
 function clearLoginError() {

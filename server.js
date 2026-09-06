@@ -42,8 +42,13 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  let pathname = parsedUrl.pathname;
+  let pathname = '/';
+  try {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    pathname = parsedUrl.pathname;
+  } catch (e) {
+    pathname = req.url.split('?')[0];
+  }
 
   // Security headers
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');

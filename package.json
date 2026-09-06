@@ -2,7 +2,7 @@
   "name": "pm-shri-kendriya-vidyalaya-portal",
   "version": "2.0.0",
   "description": "Production-ready Web Portal & CMS for PM SHRI Kendriya Vidyalaya Suranussi with Local-First & Supabase Cloud Sync.",
-  "main": "index.html",
+  "main": "server.js",
   "scripts": {
     "build": "node build.js",
     "start": "node server.js",

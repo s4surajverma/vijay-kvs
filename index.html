@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM SHRI Kendriya Vidyalaya Suranussi Jalandhar | Official Web Portal</title>
+  <meta name="description" content="Official Portal of PM SHRI Kendriya Vidyalaya Suranussi Jalandhar. Excellence in education, NIPUN FLN, Toy Pedagogy, Balvatika, and holistic child development.">
+  <meta name="keywords" content="PM SHRI, Kendriya Vidyalaya Suranussi, KVS Jalandhar, CBSE School Jalandhar, FLN NIPUN Bharat, Toy Library">
+  
+  <!-- FontAwesome Icons & Custom CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- =========================================================
+       PUBLIC PORTAL VIEW
+       ========================================================= -->
+  <div id="publicView">
+    
+    <!-- Top Emergency Announcement Ticker Bar -->
+    <div class="top-ticker-bar">
+      <div class="container ticker-wrapper">
+        <span class="ticker-badge"><i class="fas fa-bullhorn"></i> LATEST NEWS</span>
+        <div class="ticker-scroll-area">
+          <div class="ticker-content" id="tickerContent">
+            <!-- Dynamic Ticker Items Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header & School Branding -->
+    <header class="site-header">
+      <div class="container header-flex">
+        <div class="brand-wrapper">
+          <div class="emblem-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div class="brand-text">
+            <h1 id="schoolNameText">PM SHRI Kendriya Vidyalaya Suranussi</h1>
+            <p id="schoolTaglineText">Defense Sector • Est. 1979 • CBSE Affiliation No: 1600012</p>
+            <span class="school-badge-tag badge-pm-shri" id="schoolBadgeTag"><i class="fas fa-certificate" id="schoolBadgeIcon"></i> <span id="schoolBadgeText">PM SHRI CENTER OF EDUCATIONAL EXCELLENCE</span></span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-icon" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Glassmorphism Sticky Navigation Bar -->
+    <nav class="sticky-nav">
+      <div class="container nav-flex">
+        <ul class="nav-links">
+          <li class="nav-item"><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
+          
+          <li class="nav-item">
+            <a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> About Us <i class="fas fa-chevron-down nav-caret"></i></a>
+            <div class="dropdown-menu">
+              <a href="#about" class="dropdown-link"><i class="fas fa-history" style="margin-right:.4rem"></i> School History &amp; Overview</a>
+              <a href="#vision" class="dropdown-link"><i class="fas fa-eye" style="margin-right:.4rem"></i> Vision &amp; Mission Statements</a>
+              <a href="#about" class="dropdown-link"><i class="fas fa-school" style="margin-right:.4rem"></i> Campus Infrastructure &amp; Photo</a>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a href="#leadership" class="nav-link"><i class="fas fa-user-tie"></i> Leadership <i class="fas fa-chevron-down nav-caret"></i></a>
+            <div class="dropdown-menu">
+              <a href="#leadership" class="dropdown-link"><i class="fas fa-comment-dots" style="margin-right:.4rem"></i> Principal’s Message &amp; Vision</a>
+              <a href="#staff" class="dropdown-link"><i class="fas fa-chalkboard-teacher" style="margin-right:.4rem"></i> Faculty &amp; Staff Directory</a>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a href="#initiatives" class="nav-link" id="navInitiativesLink"><i class="fas fa-rocket"></i> <span id="navInitiativesText">Key Initiatives</span> <i class="fas fa-chevron-down nav-caret"></i></a>
+            <div class="dropdown-menu" id="navInitiativesDropdown">
+              <!-- Dynamically populated from active initiatives in DB -->
+              <a href="#initiatives" class="dropdown-link">Explore Vidyalaya Initiatives</a>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a href="#activities" class="nav-link"><i class="fas fa-award"></i> Activities &amp; Events <i class="fas fa-chevron-down nav-caret"></i></a>
+            <div class="dropdown-menu" id="navActivitiesDropdown">
+              <a href="#activities" class="dropdown-link"><i class="fas fa-bullhorn" style="margin-right:.4rem"></i> Latest Announcements &amp; CPD</a>
+              <a href="#gallery" class="dropdown-link"><i class="fas fa-images" style="margin-right:.4rem"></i> Photo &amp; Activity Gallery</a>
+              <a href="#resources" class="dropdown-link"><i class="fas fa-download" style="margin-right:.4rem"></i> Resource Material &amp; Syllabus</a>
+            </div>
+          </li>
+
+          <li class="nav-item"><a href="#staff" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> Our Team</a></li>
+          <li class="nav-item"><a href="#gallery" class="nav-link"><i class="fas fa-images"></i> Gallery</a></li>
+          <li class="nav-item"><a href="#resources" class="nav-link"><i class="fas fa-download"></i> Resources</a></li>
+          <li class="nav-item"><a href="#contact" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a></li>
+          <li class="nav-item nav-item-login">
+            <a href="javascript:void(0)" onclick="handleNavLoginClick()" class="nav-link nav-link-login" id="navLoginBtn">
+              <i class="fas fa-user-lock"></i> Login
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section Carousel Banners -->
+    <section id="home" class="hero-section">
+      <div class="hero-overlay" id="heroOverlay" style="background-image: url('assets/images/kv_campus.jpg');"></div>
+      <div class="container hero-content">
+        <div class="hero-badge">
+          <i class="fas fa-award"></i> <span id="heroBadgeText">PM SHRI SCHEME OF GOVERNMENT OF INDIA</span>
+        </div>
+        <h1 class="hero-title" id="heroTitleText">Welcome to <span id="heroTitleSpan">PM SHRI KV Suranussi</span></h1>
+        <p class="hero-description" id="heroDescText">
+          Nurturing young minds through holistic education, toy-based pedagogy, STEM innovation, and foundational literacy under NEP 2020.
+        </p>
+        <div class="hero-buttons">
+          <a href="#initiatives" class="btn-primary" id="heroPrimaryBtn"><i class="fas fa-compass"></i> Explore Key Initiatives</a>
+          <a href="#contact" class="btn-secondary"><i class="fas fa-paper-plane"></i> Admissions Inquiry</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Stats Metric Counter Bar -->
+    <div class="container">
+      <div class="stats-bar">
+        <div class="stats-grid" id="statsBarGrid">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- About & School Overview Section -->
+    <section id="about" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">INSTITUTION PROFILE</span>
+          <h2 class="section-title" id="aboutTitleText">About PM SHRI KV Suranussi</h2>
+          <p class="section-subtitle" id="aboutSubtitleText">A premier Defense Sector Kendriya Vidyalaya in Jalandhar Region</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+          <div>
+            <h3 style="font-size: 1.6rem; color: var(--primary); margin-bottom: 1rem;">Rich Heritage & Educational Excellence</h3>
+            <p id="schoolHistoryText" style="color: var(--text-muted); line-height: 1.8; margin-bottom: 1.5rem;">
+              <!-- History injected by JS -->
+            </p>
+            <div id="vision" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div style="background: var(--bg-card); padding: 1.2rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-gold); box-shadow: var(--shadow-sm);">
+                <h4 style="color: var(--primary); margin-bottom: 0.4rem;"><i class="fas fa-eye" style="color: var(--accent-gold);"></i> Vision</h4>
+                <p id="schoolVisionText" style="font-size: 0.85rem; color: var(--text-muted);"><!-- Vision injected by JS --></p>
+              </div>
+              <div style="background: var(--bg-card); padding: 1.2rem; border-radius: var(--radius-md); border-left: 4px solid var(--primary); box-shadow: var(--shadow-sm);">
+                <h4 style="color: var(--primary); margin-bottom: 0.4rem;"><i class="fas fa-bullseye" style="color: var(--primary);"></i> Mission</h4>
+                <p id="schoolMissionText" style="font-size: 0.85rem; color: var(--text-muted);"><!-- Mission injected by JS --></p>
+              </div>
+            </div>
+          </div>
+
+          <div style="position: relative;">
+            <img id="aboutCampusImg" src="assets/images/kv_campus.jpg" alt="Vidyalaya Campus" style="width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 2px solid var(--border-gold);">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Principal's Message Section -->
+    <section id="leadership" class="section-padding principal-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">SCHOOL LEADERSHIP</span>
+          <h2 class="section-title">Principal’s Message</h2>
+          <p class="section-subtitle" id="principalSubtitle">Guiding vision from Dr. Palishah, Principal</p>
+        </div>
+
+        <div class="principal-grid">
+          <div class="principal-card">
+            <img id="principalImg" src="assets/images/principal.png" alt="Principal Dr. Palishah" class="principal-img">
+            <h3 class="principal-name" id="principalName">Dr. Palishah</h3>
+            <div class="principal-title" id="principalTitle">Principal, PM SHRI KV Suranussi</div>
+            <span class="pm-shri-badge-tag"><i class="fas fa-user-graduate"></i> KVS Leadership</span>
+          </div>
+
+          <div>
+            <blockquote class="principal-quote" id="principalQuote">
+              <!-- Quote injected by JS -->
+            </blockquote>
+            <div id="principalContent" style="color: var(--text-muted); font-size: 1rem; line-height: 1.8;">
+              <!-- Main Message Content injected by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PM SHRI Initiatives Section -->
+    <section id="initiatives" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">EXCELLENCE IN EDUCATION</span>
+          <h2 class="section-title" id="initiativesTitleText">PM SHRI Key Initiatives</h2>
+          <p class="section-subtitle" id="initiativesSubtitleText">Transformative pedagogical frameworks implemented at Vidyalaya level</p>
+        </div>
+
+        <div class="cards-grid" id="initiativesContainer">
+          <!-- Dynamic Initiatives Cards Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Announcements & Training Programs Grid -->
+    <section id="activities" class="section-padding" style="background: var(--bg-card); border-top: 1px solid var(--border-color);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">UPDATES & CIRCULARS</span>
+          <h2 class="section-title">Latest Announcements & Teacher Trainings</h2>
+          <p class="section-subtitle">Continuous Professional Development (CPD) and Vidyalaya Events</p>
+        </div>
+
+        <div class="announcements-list" id="announcementsContainer">
+          <!-- Dynamic Announcements Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Staff & Faculty Directory -->
+    <section id="staff" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">DEDICATED FACULTY</span>
+          <h2 class="section-title">Our Teaching Staff</h2>
+          <p class="section-subtitle">Experienced educators committed to holistic student success</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; max-width: 400px;">
+          <input type="text" class="form-control" placeholder="Search teacher by name or department..." onkeyup="renderStaffDirectory(window.appState.data.staff, this.value)">
+        </div>
+
+        <div class="table-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Teacher Name</th>
+                <th>Designation</th>
+                <th>Department / Section</th>
+                <th>Qualifications</th>
+                <th>Official Email</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <!-- Staff rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section-padding" style="background: var(--bg-card);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">CAMPUS MOMENTS</span>
+          <h2 class="section-title">Photo & Activity Gallery</h2>
+          <p class="section-subtitle" id="gallerySubtitle">Capturing the vibrant learning environment</p>
+        </div>
+
+        <div class="gallery-filters" id="galleryFilterContainer">
+          <!-- Dynamic filter buttons generated by JS -->
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Dynamic Gallery Items Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Download Center / Resources Section -->
+    <section id="resources" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">STUDENT & TEACHER RESOURCES</span>
+          <h2 class="section-title">Resource Material & Circulars</h2>
+          <p class="section-subtitle">Download official syllabus, NCF frameworks, and newsletters</p>
+        </div>
+
+        <div style="margin-bottom: 2rem; max-width: 400px;">
+          <input type="text" class="form-control" placeholder="Search downloads by keyword..." onkeyup="renderResources(window.appState.data.resources, this.value)">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;" id="resourcesContainer">
+          <!-- Resource Items Injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Us & Admissions Inquiry -->
+    <section id="contact" class="section-padding" style="background: var(--bg-card); border-top: 1px solid var(--border-color);">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">GET IN TOUCH</span>
+          <h2 class="section-title">Contact & Admission Inquiries</h2>
+          <p class="section-subtitle">We are here to assist parents and visitors</p>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3 style="font-size: 1.4rem; color: var(--primary); margin-bottom: 1.2rem;">Vidyalaya Contact Details</h3>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.2rem;">
+              <i class="fas fa-map-marker-alt" style="color: var(--accent-gold); font-size: 1.3rem; margin-top: 4px;"></i>
+              <div>
+                <strong>Address:</strong>
+                <p id="contactAddressText" style="color: var(--text-muted); font-size: 0.9rem;">PM SHRI Kendriya Vidyalaya Suranussi, GT Road, Jalandhar, Punjab - 144027</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.2rem;">
+              <i class="fas fa-phone-alt" style="color: var(--accent-gold); font-size: 1.3rem; margin-top: 4px;"></i>
+              <div>
+                <strong>Phone Numbers:</strong>
+                <p id="contactPhoneText" style="color: var(--text-muted); font-size: 0.9rem;">+91 181 267 1234 / 267 5678</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.2rem;">
+              <i class="fas fa-envelope" style="color: var(--accent-gold); font-size: 1.3rem; margin-top: 4px;"></i>
+              <div>
+                <strong>Official Email:</strong>
+                <p id="contactEmailText" style="color: var(--text-muted); font-size: 0.9rem;">kvsuranussi@gmail.com</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 2rem; background: var(--bg-main); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <h4 style="font-size: 0.95rem; color: var(--primary);"><i class="fas fa-clock"></i> School Working Hours</h4>
+              <p id="contactHoursText" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">Monday - Saturday: 7:30 AM - 1:40 PM</p>
+            </div>
+          </div>
+
+          <!-- Interactive Contact Form -->
+          <div class="contact-card">
+            <h3 style="font-size: 1.4rem; color: var(--primary); margin-bottom: 1.2rem;">Send Us a Message</h3>
+            
+            <form onsubmit="handlePublicContactSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Parent / Student Full Name *</label>
+                <input type="text" id="contactName" class="form-control" required placeholder="e.g. Rajesh Kumar">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" id="contactEmail" class="form-control" required placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" id="contactPhone" class="form-control" required placeholder="+91 98765 43210">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Subject *</label>
+                <input type="text" id="contactSubject" class="form-control" required placeholder="e.g. Balvatika Admission Inquiry">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Message Details *</label>
+                <textarea id="contactMessage" class="form-control" rows="4" required placeholder="Write your inquiry here..."></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary" style="width: 100%;">
+                <i class="fas fa-paper-plane"></i> Submit Inquiry
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h4 id="footerSchoolName">PM SHRI KV Suranussi</h4>
+            <p id="footerSchoolDesc">Empowering children through quality education, national integration, and innovative pedagogy. A flagship Kendriya Vidyalaya.</p>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul class="footer-links">
+              <li><a href="#about">About Vidyalaya</a></li>
+              <li><a href="#leadership">Principal's Message</a></li>
+              <li><a href="#initiatives" id="footerInitiativesLink">Key Initiatives</a></li>
+              <li><a href="#staff">Staff Directory</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Pedagogy</h4>
+            <ul class="footer-links">
+              <li><a href="#initiatives">NIPUN FLN Mission</a></li>
+              <li><a href="#initiatives">Toy Library & Puppets</a></li>
+              <li><a href="#initiatives">Balvatika-3 Activities</a></li>
+              <li><a href="#resources">NCF Curriculum</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Administration</h4>
+            <ul class="footer-links">
+              <li><a href="javascript:void(0)" onclick="handleNavLoginClick()"><i class="fas fa-lock"></i> Admin Portal Login</a></li>
+              <li><a href="https://pmshrikvs.wordpress.com/" target="_blank"><i class="fas fa-external-link-alt"></i> Original WordPress Blog</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Section: Website Managed By -->
+        <div id="footerManagedBySection" style="margin:2.2rem 0 1.2rem 0;padding:.85rem 1.4rem;background:rgba(255,255,255,0.04);border:1px solid rgba(230,171,44,0.35);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;font-size:.92rem">
+          <i class="fas fa-user-shield" style="color:var(--accent-gold);font-size:1.05rem"></i>
+          <span style="color:#cbd5e1">Website managed by:</span>
+          <strong id="footerManagedByName" style="color:var(--accent-gold);font-weight:700">Vijay Kumar</strong>
+          <span style="color:#64748b">,</span>
+          <span id="footerManagedByDesig" style="color:#e2e8f0;font-weight:600">HM</span>
+          <span style="color:#64748b">,</span>
+          <span id="footerManagedByKv" style="color:#94a3b8">PM SHRI KV Suranussi</span>
+        </div>
+
+        <div class="footer-bottom">
+          <p id="footerCopyright">© 2026 PM SHRI Kendriya Vidyalaya Suranussi Jalandhar. All Rights Reserved. Designed with modern web standards.</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ── LOGIN MODAL ── -->
+  <div id="loginModal" class="login-modal-overlay" onclick="if(event.target===this)closeLoginModal()">
+    <div class="login-modal-card">
+      <button class="login-modal-close" onclick="closeLoginModal()"><i class="fas fa-times"></i></button>
+      <div class="login-emblem"><i class="fas fa-graduation-cap"></i></div>
+      <h2 class="login-title" id="loginModalTitle">Administrator Portal</h2>
+      <p class="login-subtitle" id="loginModalSubtitle">Personal Hub &amp; Workplace Content Management</p>
+      <div id="loginError" class="login-error" style="display:none">
+        <i class="fas fa-exclamation-triangle"></i> <span id="loginErrorText"></span>
+      </div>
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+        <div class="login-field">
+          <label>Username</label>
+          <div class="login-input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="login-field">
+          <label>Password</label>
+          <div class="login-input-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password" required>
+            <button type="button" class="pwd-eye-btn" onclick="togglePasswordVisibility()"><i class="fas fa-eye" id="pwdEyeIcon"></i></button>
+          </div>
+        </div>
+        <button type="submit" id="loginBtn" class="login-btn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+      <p class="login-hint"><i class="fas fa-info-circle"></i> Default: admin / kvs@2024</p>
+    </div>
+  </div>
+
+  <!-- ── UNIVERSAL VIEWER MODAL (Images + PDFs) ── -->
+  <div id="viewerModal" class="modal-backdrop" onclick="if(event.target===this)closeViewer()">
+    <div class="modal-content viewer-modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeViewer()"><i class="fas fa-times"></i></button>
+      <img id="viewerImg" src="" alt="Gallery Preview" style="width:100%;border-radius:var(--radius-md) var(--radius-md) 0 0;max-height:65vh;object-fit:cover;display:block">
+      <iframe id="viewerIframe" src="" style="width:100%;height:70vh;border:none;border-radius:var(--radius-md) var(--radius-md) 0 0;display:none" allowfullscreen></iframe>
+      <div style="padding:1.5rem">
+        <h3 id="viewerTitle" style="font-size:1.4rem;color:var(--primary);margin-bottom:.5rem"></h3>
+        <p id="viewerCaption" style="color:var(--text-muted);font-size:.95rem"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN PANEL ── -->
+  <div id="adminView" class="admin-view">
+    <div class="admin-header">
+      <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <div style="width:45px;height:45px;border-radius:50%;background:var(--accent-gold);color:#000;display:flex;align-items:center;justify-content:center;font-size:1.4rem"><i class="fas fa-user-shield"></i></div>
+          <div>
+            <h2 id="adminHeaderTitle" style="color:#fff;font-size:1.3rem">Administrator Portal &amp; Workplace Management</h2>
+            <p style="font-size:.8rem;color:var(--accent-gold)"><span id="adminWorkplaceDisplay">Current Workplace: PM SHRI KV Suranussi</span> • Logged in as: <strong id="adminUserDisplay">Administrator</strong></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
+          <button onclick="exportAppData()" class="btn-secondary" style="padding:.5rem 1rem;font-size:.85rem"><i class="fas fa-download"></i> Backup JSON</button>
+          <button onclick="resetAppData()" style="background:rgba(217,56,58,.2);color:#ff8888;border:1px solid #ff8888;padding:.5rem 1rem;border-radius:var(--radius-md);font-weight:600;font-size:.85rem;cursor:pointer"><i class="fas fa-undo"></i> Reset</button>
+          <button onclick="exitAdminView()" class="btn-primary" style="padding:.5rem 1rem;font-size:.85rem"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="margin-top:2rem">
+      <!-- Metrics -->
+      <div class="stats-grid" style="margin-bottom:2rem">
+        <div class="stat-card" style="background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)"><div class="stat-number" id="adminStatAnnouncements">0</div><div class="stat-label">Announcements</div></div>
+        <div class="stat-card" style="background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)"><div class="stat-number" id="adminStatStaff">0</div><div class="stat-label">Faculty</div></div>
+        <div class="stat-card" style="background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)"><div class="stat-number" id="adminStatGallery">0</div><div class="stat-label">Gallery</div></div>
+        <div class="stat-card" style="background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)"><div class="stat-number" id="adminStatResources">0</div><div class="stat-label">Resources</div></div>
+        <div class="stat-card" style="background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)"><div class="stat-number" id="adminStatInquiries">0</div><div class="stat-label">Inquiries</div></div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="admin-nav" style="overflow-x:auto;white-space:nowrap;padding-bottom:.5rem">
+        <button class="admin-tab active" data-tab="announcements" onclick="switchAdminTab('announcements')"><i class="fas fa-bullhorn"></i> Announcements</button>
+        <button class="admin-tab" data-tab="school-info" onclick="switchAdminTab('school-info')"><i class="fas fa-school"></i> School Info</button>
+        <button class="admin-tab" data-tab="hero-stats" onclick="switchAdminTab('hero-stats')"><i class="fas fa-home"></i> Hero &amp; Stats</button>
+        <button class="admin-tab" data-tab="principal" onclick="switchAdminTab('principal')"><i class="fas fa-user-tie"></i> Principal</button>
+        <button class="admin-tab" data-tab="initiatives" onclick="switchAdminTab('initiatives')"><i class="fas fa-rocket"></i> Initiatives</button>
+        <button class="admin-tab" data-tab="gallery" onclick="switchAdminTab('gallery')"><i class="fas fa-images"></i> Gallery</button>
+        <button class="admin-tab" data-tab="resources" onclick="switchAdminTab('resources')"><i class="fas fa-file-pdf"></i> Resources</button>
+        <button class="admin-tab" data-tab="staff" onclick="switchAdminTab('staff')"><i class="fas fa-chalkboard-teacher"></i> Staff</button>
+        <button class="admin-tab" data-tab="inquiries" onclick="switchAdminTab('inquiries')"><i class="fas fa-inbox"></i> Inquiries</button>
+        <button class="admin-tab" data-tab="settings" onclick="switchAdminTab('settings')"><i class="fas fa-cog"></i> Settings</button>
+      </div>
+
+      <!-- TAB: Announcements -->
+      <div id="adminTab_announcements" class="admin-tab-content">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-plus-circle" style="color:var(--accent-gold)"></i> Publish New Announcement</h3>
+          <form onsubmit="handleAddAnnouncement(event)">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem" class="form-group">
+              <div><label class="form-label">Title *</label><input type="text" id="newAnnTitle" class="form-control" required placeholder="e.g. Two-Day Training on Phonics"></div>
+              <div><label class="form-label">Date (DD.MM.YYYY) *</label><input type="text" id="newAnnDate" class="form-control" required placeholder="18.12.2025"></div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
+                  <label class="form-label" style="margin:0">Category</label>
+                  <button type="button" onclick="toggleNewCategoryInput('newAnn')" class="btn-text" style="font-size:0.75rem;color:var(--primary);font-weight:700;background:none;border:none;cursor:pointer;padding:0">
+                    <i class="fas fa-plus"></i> New
+                  </button>
+                </div>
+                <select id="newAnnCategory" class="form-control" onchange="handleCategorySelectChange('newAnn', this.value)">
+                  <option>Training</option>
+                  <option>Workshops</option>
+                  <option>Pedagogy</option>
+                  <option>FLN / NIPUN</option>
+                  <option>Curriculum</option>
+                  <option>Circular</option>
+                  <option>Inclusive Education</option>
+                  <option value="__new__">➕ + Add New Category...</option>
+                </select>
+                <div id="newAnnNewCategoryGroup" style="display:none;margin-top:0.4rem">
+                  <div style="display:flex;gap:0.4rem">
+                    <input type="text" id="newAnnNewCategory" class="form-control" placeholder="Type new category..." style="font-size:0.85rem">
+                    <button type="button" onclick="cancelNewCategoryInput('newAnn')" class="btn-secondary" style="padding:0.35rem 0.6rem;font-size:0.75rem" title="Cancel">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem" class="form-group">
+              <div><label class="form-label">Badge Tag</label><input type="text" id="newAnnBadge" class="form-control" placeholder="e.g. NEW"></div>
+              <div><label class="form-label">Drive / External Link</label><input type="url" id="newAnnLink" class="form-control" placeholder="https://drive.google.com/..."></div>
+            </div>
+            <div class="form-group"><label class="form-label">Description *</label><textarea id="newAnnDesc" class="form-control" rows="3" required></textarea></div>
+            <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Publish</button>
+          </form>
+        </div>
+        <div class="admin-panel-card"><h3 style="margin-bottom:1rem;color:var(--primary)"><i class="fas fa-list"></i> Existing Announcements</h3><div id="adminAnnouncementsList"></div></div>
+      </div>
+
+      <!-- TAB: School Info -->
+      <div id="adminTab_school-info" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+            <h3 style="color:var(--primary);margin:0"><i class="fas fa-school" style="color:var(--accent-gold)"></i> Workplace &amp; School Profile</h3>
+            <button type="button" onclick="applyWorkplaceTransferPreset()" class="btn-secondary" style="font-size:.85rem;padding:.4rem .9rem">
+              <i class="fas fa-magic"></i> Auto-Generate Tagline &amp; Subtitle
+            </button>
+          </div>
+          <form onsubmit="handleSaveSchoolInfo(event)">
+            
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">School Full Name *</label>
+                <input type="text" id="siName" class="form-control" required placeholder="e.g. Kendriya Vidyalaya Suranussi">
+                <small class="form-hint">Full institutional name displayed in navigation and headers</small>
+              </div>
+              <div>
+                <label class="form-label">School Short Name</label>
+                <input type="text" id="siShortName" class="form-control" placeholder="e.g. KV Suranussi">
+                <small class="form-hint">Used for concise mobile titles</small>
+              </div>
+              <div>
+                <label class="form-label">CBSE Affiliation No.</label>
+                <input type="text" id="siAffiliation" class="form-control" placeholder="e.g. CBSE Affiliation No: 1600012">
+                <small class="form-hint">Official CBSE board affiliation</small>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Is this a PM SHRI KV?</label>
+                <div style="margin-top:.5rem">
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600">
+                    <input type="checkbox" id="siIsPmShri" onchange="togglePmShriOptions(this.checked)" style="width:18px;height:18px">
+                    <span>Yes, PM SHRI Designated</span>
+                  </label>
+                </div>
+                <small class="form-hint">Enables PM SHRI badges &amp; labels</small>
+              </div>
+              <div>
+                <label class="form-label">School Sector</label>
+                <input type="text" id="siSector" class="form-control" placeholder="e.g. Defense Sector">
+                <small class="form-hint">Defense, Civil, Project, or IHL</small>
+              </div>
+              <div>
+                <label class="form-label">KVS Region</label>
+                <input type="text" id="siRegion" class="form-control" placeholder="e.g. Jalandhar Region">
+                <small class="form-hint">Regional Office jurisdiction</small>
+              </div>
+              <div>
+                <label class="form-label">Year Established</label>
+                <input type="text" id="siEstablished" class="form-control" placeholder="e.g. 1979">
+                <small class="form-hint">Foundation year of school</small>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Header Badge Text</label>
+                <input type="text" id="siBadgeText" class="form-control" placeholder="e.g. PM SHRI CENTER OF EDUCATIONAL EXCELLENCE">
+                <small class="form-hint">Pill badge shown right above the school name in the top header</small>
+              </div>
+              <div>
+                <label class="form-label">Show Badge in Header</label>
+                <div style="margin-top:.5rem">
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600">
+                    <input type="checkbox" id="siShowBadge" checked style="width:18px;height:18px">
+                    <span>Display Badge</span>
+                  </label>
+                </div>
+                <small class="form-hint">Toggle visibility of header badge</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Header Tagline</label>
+              <input type="text" id="siTagline" class="form-control" placeholder="Defense Sector • Est. 1979 • CBSE Affiliation No: 1600012">
+              <small class="form-hint">Subtitle displayed directly beneath the school name in the top header</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">About Section Subtitle (Flexible Workplace Tagline)</label>
+              <input type="text" id="siSubtitle" class="form-control" placeholder="A premier Defense Sector Kendriya Vidyalaya in Jalandhar Region">
+              <small class="form-hint">Workplace tagline shown in the About Us section subtitle</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Campus Photo (About Section)</label>
+              <div style="display:flex;gap:1.2rem;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap">
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="campusImgChoice" id="optCampusKv" value="kv" onchange="selectCampusPhotoType('kv')">
+                  <span>Use Inbuilt Default Photo</span>
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="campusImgChoice" id="optCampusPmShri" value="pmshri" onchange="selectCampusPhotoType('pmshri')">
+                  <span>Use Inbuilt PM SHRI Photo</span>
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="campusImgChoice" id="optCampusCustom" value="custom" onchange="selectCampusPhotoType('custom')">
+                  <span>Google Drive URL / Custom Link</span>
+                </label>
+              </div>
+              <div style="display:flex;gap:.8rem;align-items:center">
+                <input type="text" id="siCampusImage" class="form-control" placeholder="assets/images/kv_campus.jpg or https://drive.google.com/..." oninput="detectCampusPhotoType(this.value)">
+                <button type="button" onclick="previewDriveInput('siCampusImage','siCampusImgPrev')" class="btn-secondary" style="white-space:nowrap;padding:.5rem 1rem"><i class="fas fa-eye"></i> Preview</button>
+              </div>
+              <small class="form-hint">Image featured in the About Us section beside School History &amp; Vision</small>
+              <img id="siCampusImgPrev" src="" alt="Campus Preview" style="display:none;margin-top:.8rem;max-height:140px;border-radius:var(--radius-sm);border:2px solid var(--border-gold)">
+            </div>
+
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Address</label>
+                <input type="text" id="siAddress" class="form-control" placeholder="e.g. GT Road, Suranussi, Jalandhar, Punjab - 144027">
+                <small class="form-hint">Physical station address</small>
+              </div>
+              <div>
+                <label class="form-label">Phone</label>
+                <input type="text" id="siPhone" class="form-control" placeholder="e.g. 0181-2670208">
+                <small class="form-hint">Office contact number</small>
+              </div>
+              <div>
+                <label class="form-label">Email</label>
+                <input type="email" id="siEmail" class="form-control" placeholder="e.g. kvsuranussi@gmail.com">
+                <small class="form-hint">Official inquiry email</small>
+              </div>
+              <div>
+                <label class="form-label">Working Hours</label>
+                <input type="text" id="siWorkingHours" class="form-control" placeholder="Mon - Sat: 7:30 AM - 1:40 PM">
+                <small class="form-hint">School operational timings</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">School History</label>
+              <textarea id="siHistory" class="form-control" rows="5" placeholder="Enter the history and background of the Vidyalaya..."></textarea>
+              <small class="form-hint">Detailed historical background rendered in the About section</small>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Vision</label>
+                <textarea id="siVision" class="form-control" rows="4" placeholder="To pursue excellence and set pace in the field of school education..."></textarea>
+                <small class="form-hint">Core institutional vision</small>
+              </div>
+              <div>
+                <label class="form-label">Mission</label>
+                <textarea id="siMission" class="form-control" rows="4" placeholder="To cater to educational needs of children of transferable Central Govt employees..."></textarea>
+                <small class="form-hint">Core institutional mission</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Footer Brief Summary</label>
+              <textarea id="siFooterDesc" class="form-control" rows="2" placeholder="Empowering children through quality education, national integration, and innovative pedagogy."></textarea>
+              <small class="form-hint">Short 1-2 sentence description shown in the website footer</small>
+            </div>
+            <div style="background:var(--bg-main);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:1.2rem;margin-bottom:1.5rem">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+                <div style="display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--primary)">
+                  <i class="fas fa-user-cog" style="color:var(--accent-gold)"></i> Website Managed By (Footer Attribution)
+                </div>
+                <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(230,171,44,.15);color:var(--accent-gold);font-weight:600">Footer Credit</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1.5fr 1fr 1.5fr;gap:1rem">
+                <div>
+                  <label class="form-label">Manager / Admin Name</label>
+                  <input type="text" id="siMbName" class="form-control" placeholder="e.g. Vijay Kumar">
+                  <small class="form-hint">Full name of webmaster</small>
+                </div>
+                <div>
+                  <label class="form-label">Designation</label>
+                  <input type="text" id="siMbDesignation" class="form-control" placeholder="e.g. HM">
+                  <small class="form-hint">e.g. HM, VP, PGT, TGT</small>
+                </div>
+                <div>
+                  <label class="form-label">Workplace / KV Name</label>
+                  <input type="text" id="siMbKvName" class="form-control" placeholder="e.g. PM SHRI KV Suranussi">
+                  <small class="form-hint">School name for footer</small>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Workplace &amp; School Info</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Hero & Stats -->
+      <div id="adminTab_hero-stats" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-home" style="color:var(--accent-gold)"></i> Edit Hero Section &amp; Stats Bar</h3>
+          <form onsubmit="handleSaveHeroStats(event)">
+            <div class="form-group">
+              <label class="form-label">Hero Badge Text</label>
+              <input type="text" id="heroBadge" class="form-control" placeholder="e.g. PM SHRI SCHEME OF GOVERNMENT OF INDIA">
+              <small class="form-hint">Highlighted badge chip displayed above the primary headline in the homepage hero banner</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Title</label>
+              <input type="text" id="heroTitle" class="form-control" placeholder="e.g. Welcome to PM SHRI KV Suranussi">
+              <small class="form-hint">Primary headline on homepage. If starting with &quot;Welcome to &quot;, the school name automatically gets golden highlighted styling.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Description</label>
+              <textarea id="heroDesc" class="form-control" rows="3" placeholder="e.g. Nurturing young minds through holistic education, toy-based pedagogy, STEM innovation, and foundational literacy under NEP 2020."></textarea>
+              <small class="form-hint">Overview paragraph displayed directly below the headline on the homepage</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Background Image</label>
+              <div style="display:flex;gap:1.2rem;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap">
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="heroImgChoice" id="optHeroKv" value="kv" onchange="selectHeroPhotoType('kv')">
+                  <span>Use Inbuilt Default Photo</span>
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="heroImgChoice" id="optHeroPmShri" value="pmshri" onchange="selectHeroPhotoType('pmshri')">
+                  <span>Use Inbuilt PM SHRI Photo</span>
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.88rem;font-weight:600">
+                  <input type="radio" name="heroImgChoice" id="optHeroCustom" value="custom" onchange="selectHeroPhotoType('custom')">
+                  <span>Google Drive URL / Custom Link</span>
+                </label>
+              </div>
+              <div style="display:flex;gap:.8rem;align-items:center">
+                <input type="text" id="heroBgImage" class="form-control" placeholder="assets/images/kv_campus.jpg or https://drive.google.com/..." oninput="detectHeroPhotoType(this.value)">
+                <button type="button" onclick="previewDriveInput('heroBgImage','heroBgPrev')" class="btn-secondary" style="white-space:nowrap;padding:.5rem 1rem"><i class="fas fa-eye"></i> Preview</button>
+              </div>
+              <small class="form-hint">Backdrop image behind the hero content. Use the buttons above for instant default presets or paste a link.</small>
+              <img id="heroBgPrev" src="" alt="Hero Preview" style="display:none;margin-top:.8rem;max-height:140px;border-radius:var(--radius-sm);border:2px solid var(--border-gold)">
+            </div>
+            <h4 style="margin:1.5rem 0 .4rem;color:var(--primary)">Stats Bar Items</h4>
+            <small class="form-hint" style="margin-bottom:1rem">Metrics displayed in the stats bar immediately below the hero banner (e.g. Value: 1500+, Label: Active Students)</small>
+            <div id="statsEditorList"></div>
+            <button type="button" onclick="addStatRow()" class="btn-secondary" style="margin-bottom:1.5rem"><i class="fas fa-plus"></i> Add Stat</button><br>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Hero &amp; Stats</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Principal -->
+      <div id="adminTab_principal" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-user-tie" style="color:var(--accent-gold)"></i> Edit Principal's Message</h3>
+          <form onsubmit="handleSavePrincipal(event)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Principal's Name *</label>
+                <input type="text" id="pName" class="form-control" required placeholder="e.g. Sh. Gurpal Singh">
+                <small class="form-hint">Full name of head of school / administrator</small>
+              </div>
+              <div>
+                <label class="form-label">Designation / Title *</label>
+                <input type="text" id="pTitle" class="form-control" required placeholder="e.g. Principal &amp; Academic Administrator">
+                <small class="form-hint">Official administrative designation</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photo URL (local path or Google Drive share link)</label>
+              <div style="display:flex;gap:.8rem;align-items:center">
+                <input type="text" id="pImage" class="form-control" placeholder="assets/images/principal.png or https://drive.google.com/...">
+                <button type="button" onclick="previewDriveInput('pImage','pImgPreview')" class="btn-secondary" style="white-space:nowrap;padding:.5rem 1rem"><i class="fas fa-eye"></i> Preview</button>
+              </div>
+              <small class="form-hint">Portrait photo of the Principal displayed in the Principal's Desk section</small>
+              <img id="pImgPreview" src="" alt="Preview" style="display:none;margin-top:.8rem;max-height:150px;border-radius:var(--radius-sm);border:2px solid var(--border-gold)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Featured Quote</label>
+              <textarea id="pQuote" class="form-control" rows="3" placeholder="e.g. Education is not merely the learning of facts, but the training of the mind to think and innovate. At our Vidyalaya, we cultivate curiosity and character."></textarea>
+              <small class="form-hint">Highlighted quote shown in stylized italics beside the portrait</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Full Message Content</label>
+              <textarea id="pContent" class="form-control" rows="10" placeholder="Dear Students, Parents, and Esteemed Visitors, welcome to our official portal... (separate paragraphs with blank lines)"></textarea>
+              <small class="form-hint">Complete letter from the Principal. Paragraphs separated by blank lines will render cleanly formatted.</small>
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Principal Info</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Initiatives -->
+      <div id="adminTab_initiatives" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-rocket" style="color:var(--accent-gold)"></i> Add Vidyalaya Initiative</h3>
+          <form onsubmit="handleAddInitiative(event)">
+            <div style="display:grid;grid-template-columns:1.8fr 1.2fr 1.2fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Title *</label>
+                <input type="text" id="initTitle" class="form-control" required placeholder="e.g. Balvatika-3 &amp; Vidya Pravesh">
+                <small class="form-hint">Name of the program, pedagogy, or project</small>
+              </div>
+              <div>
+                <label class="form-label">Category *</label>
+                <input type="text" id="initCategory" class="form-control" required list="initCategorySuggestions" placeholder="e.g. Foundational Learning">
+                <datalist id="initCategorySuggestions">
+                  <option value="Foundational Learning (FLN)">
+                  <option value="Toy-Based Pedagogy">
+                  <option value="STEM &amp; Innovation">
+                  <option value="Digital Learning &amp; ICT">
+                  <option value="Vocational &amp; Skill Education">
+                  <option value="Green School &amp; Eco Club">
+                  <option value="Sports &amp; Fitness">
+                  <option value="Inclusive Education">
+                  <option value="Art &amp; Cultural Heritage">
+                </datalist>
+                <small class="form-hint">Area or educational domain</small>
+              </div>
+              <div>
+                <label class="form-label">Theme Icon</label>
+                <div style="display:flex;gap:0.5rem;align-items:center">
+                  <select id="initIconSelect" class="form-control" onchange="updateInitIconPreview(this.value)">
+                    <option value="fa-book-reader" selected>📖 Reading &amp; FLN</option>
+                    <option value="fa-gamepad">🧸 Toy &amp; Puppet Pedagogy</option>
+                    <option value="fa-rocket">🚀 STEM &amp; Innovation</option>
+                    <option value="fa-graduation-cap">🎓 Academic Excellence</option>
+                    <option value="fa-award">🏆 Awards &amp; Recognition</option>
+                    <option value="fa-palette">🎨 Arts &amp; CCA</option>
+                    <option value="fa-laptop-code">💻 Digital Learning &amp; ICT</option>
+                    <option value="fa-futbol">⚽ Sports &amp; Fitness</option>
+                    <option value="fa-leaf">🌱 Eco Club &amp; Greenery</option>
+                    <option value="fa-microscope">🔬 Science &amp; Labs</option>
+                    <option value="fa-lightbulb">💡 Innovation &amp; Tinkering</option>
+                    <option value="fa-hands-helping">🤝 Community &amp; Values</option>
+                    <option value="fa-star">⭐ General Milestone</option>
+                    <option value="__custom__">⚙️ Custom Icon Code...</option>
+                  </select>
+                  <div id="initIconPreviewBadge" title="Live Icon Preview" style="width:40px;height:40px;border-radius:var(--radius-sm);background:var(--bg-main);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--accent-gold);flex-shrink:0">
+                    <i id="initIconPreviewIco" class="fas fa-book-reader"></i>
+                  </div>
+                </div>
+                <input type="text" id="initIcon" class="form-control" value="fa-book-reader" style="display:none;margin-top:.4rem" placeholder="e.g. fa-lightbulb" oninput="document.getElementById('initIconPreviewIco').className = 'fas ' + (this.value || 'fa-star')">
+                <small class="form-hint">Displayed on initiative card &amp; top menu</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Image URL (local or Google Drive share link)</label>
+              <div style="display:flex;gap:.8rem;align-items:center">
+                <input type="text" id="initImage" class="form-control" placeholder="https://drive.google.com/file/d/.../view or assets/images/...">
+                <button type="button" onclick="previewDriveInput('initImage','initImgPrev')" class="btn-secondary" style="white-space:nowrap;padding:.5rem 1rem"><i class="fas fa-eye"></i> Preview</button>
+              </div>
+              <img id="initImgPrev" src="" alt="" style="display:none;margin-top:.8rem;max-height:120px;border-radius:var(--radius-sm)">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Summary *</label>
+                <textarea id="initSummary" class="form-control" rows="3" required placeholder="Short summary displayed on public cards..."></textarea>
+              </div>
+              <div>
+                <label class="form-label">Details *</label>
+                <textarea id="initDetails" class="form-control" rows="3" required placeholder="Comprehensive details and educational impact..."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add Initiative</button>
+          </form>
+        </div>
+        <div class="admin-panel-card"><h3 style="margin-bottom:1rem;color:var(--primary)"><i class="fas fa-list"></i> Current Initiatives</h3><div id="adminInitiativesList"></div></div>
+      </div>
+
+      <!-- TAB: Gallery -->
+      <div id="adminTab_gallery" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:.5rem;color:var(--primary)"><i class="fas fa-images" style="color:var(--accent-gold)"></i> Add Gallery Photo</h3>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.5rem"><i class="fab fa-google-drive" style="color:#4285F4"></i> Paste any public Google Drive share link — auto-converted to display URL.</p>
+          <form onsubmit="handleAddGalleryItem(event)">
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Photo Title *</label>
+                <input type="text" id="galTitle" class="form-control" required placeholder="e.g. Annual Day Cultural Performance">
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
+                  <label class="form-label" style="margin:0">Category</label>
+                  <button type="button" onclick="toggleNewCategoryInput('gal')" class="btn-text" style="font-size:0.8rem;color:var(--primary);font-weight:700;background:none;border:none;cursor:pointer;padding:0">
+                    <i class="fas fa-plus"></i> Add New
+                  </button>
+                </div>
+                <select id="galCategory" class="form-control" onchange="handleCategorySelectChange('gal', this.value)">
+                  <option value="PM SHRI">PM SHRI</option>
+                  <option value="FLN &amp; Activities">FLN &amp; Activities</option>
+                  <option value="Campus">Campus</option>
+                  <option value="Events">Events</option>
+                  <option value="__new__">➕ + Add New Category...</option>
+                </select>
+                <div id="galNewCategoryGroup" style="display:none;margin-top:0.5rem">
+                  <div style="display:flex;gap:0.4rem">
+                    <input type="text" id="galNewCategory" class="form-control" placeholder="Type new category (e.g. Sports, CCA)..." style="font-size:0.88rem">
+                    <button type="button" onclick="cancelNewCategoryInput('gal')" class="btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.8rem" title="Cancel new category">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <small class="form-hint">Select existing or create a new category</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photo URL (local path or Google Drive share link) *</label>
+              <div style="display:flex;gap:.8rem;align-items:center">
+                <input type="text" id="galUrl" class="form-control" required placeholder="https://drive.google.com/file/d/XXX/view?usp=sharing">
+                <button type="button" onclick="previewDriveInput('galUrl','galImgPrev')" class="btn-secondary" style="white-space:nowrap;padding:.5rem 1rem"><i class="fas fa-eye"></i> Preview</button>
+              </div>
+              <img id="galImgPrev" src="" alt="" style="display:none;margin-top:.8rem;max-height:150px;border-radius:var(--radius-sm);border:2px solid var(--border-color)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Caption</label>
+              <input type="text" id="galCaption" class="form-control" placeholder="e.g. Students demonstrating science exhibits at the regional fair">
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-upload"></i> Add to Gallery</button>
+          </form>
+        </div>
+        <div class="admin-panel-card"><h3 style="margin-bottom:1rem;color:var(--primary)"><i class="fas fa-th"></i> Gallery Items</h3><div id="adminGalleryList"></div></div>
+      </div>
+
+      <!-- TAB: Resources -->
+      <div id="adminTab_resources" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:.5rem;color:var(--primary)"><i class="fas fa-file-pdf" style="color:var(--accent-gold)"></i> Add PDF Resource</h3>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.5rem"><i class="fab fa-google-drive" style="color:#4285F4"></i> Google Drive PDF links open in an embedded inline viewer.</p>
+          <form onsubmit="handleAddResource(event)">
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Resource Title *</label>
+                <input type="text" id="resTitle" class="form-control" required placeholder="e.g. Class X Mathematics Sample Question Papers 2025">
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
+                  <label class="form-label" style="margin:0">Category</label>
+                  <button type="button" onclick="toggleNewCategoryInput('res')" class="btn-text" style="font-size:0.8rem;color:var(--primary);font-weight:700;background:none;border:none;cursor:pointer;padding:0">
+                    <i class="fas fa-plus"></i> Add New
+                  </button>
+                </div>
+                <select id="resCategory" class="form-control" onchange="handleCategorySelectChange('res', this.value)">
+                  <option>Curriculum</option>
+                  <option>Question Banks</option>
+                  <option>Newsletters</option>
+                  <option>Admissions</option>
+                  <option>Circulars</option>
+                  <option>Reports</option>
+                  <option value="__new__">➕ + Add New Category...</option>
+                </select>
+                <div id="resNewCategoryGroup" style="display:none;margin-top:0.5rem">
+                  <div style="display:flex;gap:0.4rem">
+                    <input type="text" id="resNewCategory" class="form-control" placeholder="Type new category (e.g. Study Material)..." style="font-size:0.88rem">
+                    <button type="button" onclick="cancelNewCategoryInput('res')" class="btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.8rem" title="Cancel new category">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <small class="form-hint">Select existing or create a new category</small>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">File Size (e.g. 2.4 MB)</label>
+                <input type="text" id="resSize" class="form-control" placeholder="2.4 MB">
+              </div>
+              <div>
+                <label class="form-label">Publish Date</label>
+                <input type="date" id="resDate" class="form-control">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Drive / Download URL</label>
+              <input type="text" id="resUrl" class="form-control" placeholder="https://drive.google.com/file/d/.../view?usp=sharing">
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Add Resource</button>
+          </form>
+        </div>
+        <div class="admin-panel-card"><h3 style="margin-bottom:1rem;color:var(--primary)"><i class="fas fa-list"></i> Resource List</h3><div id="adminResourcesList"></div></div>
+      </div>
+
+      <!-- TAB: Staff -->
+      <div id="adminTab_staff" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-user-plus" style="color:var(--accent-gold)"></i> Add Faculty Member</h3>
+          <form onsubmit="handleAddStaff(event)">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="newStaffName" class="form-control" required placeholder="e.g. Smt. Neha Sharma">
+              </div>
+              <div>
+                <label class="form-label">Designation *</label>
+                <input type="text" id="newStaffDesignation" class="form-control" required placeholder="e.g. PGT Computer Science">
+              </div>
+              <div>
+                <label class="form-label">Department *</label>
+                <input type="text" id="newStaffDept" class="form-control" required placeholder="e.g. Secondary Section">
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="form-group">
+              <div>
+                <label class="form-label">Qualifications</label>
+                <input type="text" id="newStaffQual" class="form-control" placeholder="e.g. M.Sc. (Computer Science), B.Ed.">
+              </div>
+              <div>
+                <label class="form-label">Official Email</label>
+                <input type="email" id="newStaffEmail" class="form-control" placeholder="e.g. neha.sharma@kvs.gov.in">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Add Teacher Profile</button>
+          </form>
+        </div>
+        <div class="admin-panel-card"><h3 style="margin-bottom:1rem;color:var(--primary)"><i class="fas fa-users"></i> Staff Directory</h3><div id="adminStaffList"></div></div>
+      </div>
+
+      <!-- TAB: Inquiries -->
+      <div id="adminTab_inquiries" class="admin-tab-content" style="display:none">
+        <div class="admin-panel-card">
+          <h3 style="margin-bottom:1.5rem;color:var(--primary)"><i class="fas fa-inbox" style="color:var(--accent-gold)"></i> Submitted Contact &amp; Admission Queries</h3>
+          <div id="adminInquiriesList"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Settings & Navigation Map -->
+      <div id="adminTab_settings" class="admin-tab-content" style="display:none">
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start">
+          
+          <div class="admin-panel-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem">
+              <h3 style="color:var(--primary);margin:0"><i class="fas fa-sitemap" style="color:var(--accent-gold)"></i> Navigation Menus &amp; Content Alignment</h3>
+              <span style="font-size:.8rem;background:var(--bg-main);padding:.3rem .7rem;border-radius:var(--radius-full);border:1px solid var(--border-color);font-weight:600">
+                <i class="fas fa-check-circle" style="color:#22c55e"></i> 100% Admin Managed
+              </span>
+            </div>
+            <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6">
+              Every top-level menu item and dropdown link connects directly to a live content section on your web portal. Use the quick-jump buttons below to update any section's content in real-time.
+            </p>
+
+            <div style="display:grid;gap:.9rem">
+              
+              <!-- Menu 1: Home -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-home" style="color:var(--accent-gold)"></i> 1. Home
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(230,171,44,.15);color:var(--accent-gold);font-weight:600">Page Top</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Hero banner, headline title, badge pill, background photo &amp; quick metric counters</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('hero-stats')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Hero &amp; Stats <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 2: About Us -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-info-circle" style="color:var(--accent-gold)"></i> 2. About Us ▾
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(43,89,195,.15);color:var(--accent-blue);font-weight:600">3 Sub-Links</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Sub-menus: <em>School History &amp; Overview</em>, <em>Vision &amp; Mission</em>, <em>Campus &amp; Infrastructure</em></div>
+                </div>
+                <button type="button" onclick="switchAdminTab('school-info')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in School Info <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 3: Leadership -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-user-tie" style="color:var(--accent-gold)"></i> 3. Leadership ▾
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(43,89,195,.15);color:var(--accent-blue);font-weight:600">2 Sub-Links</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Sub-menus: <em>Principal’s Message &amp; Vision</em> (Principal tab), <em>Faculty &amp; Staff Directory</em> (Staff tab)</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('principal')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Principal <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 4: Initiatives -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-rocket" style="color:var(--accent-gold)"></i> 4. Key Initiatives ▾
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(34,197,94,.15);color:#22c55e;font-weight:600">Auto-Synced</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Top dropdown automatically lists the latest active initiatives published in the database</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('initiatives')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Initiatives <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 5: Activities & Events -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-award" style="color:var(--accent-gold)"></i> 5. Activities &amp; Events ▾
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:rgba(43,89,195,.15);color:var(--accent-blue);font-weight:600">3 Sub-Links</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Sub-menus: <em>Announcements &amp; Circulars</em>, <em>Photo Gallery</em>, <em>Resource Material</em></div>
+                </div>
+                <button type="button" onclick="switchAdminTab('announcements')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Announcements <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 6: Our Team -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-chalkboard-teacher" style="color:var(--accent-gold)"></i> 6. Our Team
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-muted);font-weight:600">Staff Section</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Searchable faculty directory table with designations, departments, qualifications &amp; emails</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('staff')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Staff <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 7: Gallery -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-images" style="color:var(--accent-gold)"></i> 7. Gallery
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-muted);font-weight:600">Dynamic Categories</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Photo grid with live modal lightbox viewer and dynamic category filter tabs</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('gallery')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Gallery <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 8: Resources -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-download" style="color:var(--accent-gold)"></i> 8. Resources
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-muted);font-weight:600">Download Center</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Downloadable syllabus, curriculum documents, question banks, and circular PDFs</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('resources')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  Edit in Resources <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <!-- Menu 9: Contact Us -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-main);flex-wrap:wrap;gap:.8rem">
+                <div>
+                  <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--primary)">
+                    <i class="fas fa-envelope" style="color:var(--accent-gold)"></i> 9. Contact Us
+                    <span style="font-size:.75rem;padding:.15rem .5rem;border-radius:var(--radius-full);background:var(--bg-card);color:var(--text-muted);font-weight:600">Inquiry Form</span>
+                  </div>
+                  <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem">Station address, phone, email &amp; working hours; visitor queries saved directly to Inquiries tab</div>
+                </div>
+                <button type="button" onclick="switchAdminTab('inquiries')" class="btn-secondary" style="font-size:.8rem;padding:.4rem .9rem">
+                  View Inquiries <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Side card: Webmaster Attribution, Password & Danger Zone -->
+          <div>
+            <!-- Webmaster / Managed By Attribution Card -->
+            <div class="admin-panel-card" style="margin-bottom:1.5rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+                <h3 style="color:var(--primary);margin:0;font-size:1.15rem"><i class="fas fa-user-cog" style="color:var(--accent-gold)"></i> Website Managed By</h3>
+                <span style="font-size:.75rem;padding:.2rem .6rem;border-radius:var(--radius-full);background:rgba(230,171,44,.15);color:var(--accent-gold);font-weight:700">Footer Attribution</span>
+              </div>
+              <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.5">
+                Customize administrator and webmaster details shown in the website footer.
+              </p>
+              <form onsubmit="handleSaveManagedBy(event)">
+                <div class="form-group">
+                  <label class="form-label">Manager / Admin Name *</label>
+                  <input type="text" id="mbName" class="form-control" required placeholder="e.g. Vijay Kumar">
+                  <small class="form-hint">Full name of the managing officer</small>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Designation *</label>
+                  <input type="text" id="mbDesignation" class="form-control" required placeholder="e.g. HM">
+                  <small class="form-hint">e.g. HM, Vice Principal, PGT (CS), TGT</small>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">KV / Workplace Name *</label>
+                  <input type="text" id="mbKvName" class="form-control" required placeholder="e.g. PM SHRI KV Suranussi">
+                  <small class="form-hint">School name for footer attribution</small>
+                </div>
+                <div class="form-group">
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:600;font-size:.9rem">
+                    <input type="checkbox" id="mbShow" checked style="width:18px;height:18px">
+                    <span>Show attribution in website footer</span>
+                  </label>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%"><i class="fas fa-save"></i> Save Attribution</button>
+              </form>
+            </div>
+
+            <!-- Cloud Database & Supabase Environment-Managed Card -->
+            <div class="admin-panel-card" style="margin-bottom:1.5rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+                <h3 style="color:var(--primary);margin:0;font-size:1.15rem"><i class="fas fa-cloud" style="color:var(--accent-teal)"></i> Cloud Database &amp; Supabase</h3>
+                <span id="spbStatusBadge" style="font-size:.75rem;padding:.2rem .6rem;border-radius:var(--radius-full);background:rgba(230,171,44,.15);color:var(--accent-gold);font-weight:700">
+                  <i class="fas fa-circle-notch fa-spin"></i> Checking
+                </span>
+              </div>
+              <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                Cloud database connectivity is managed via <strong>Render Environment Variables</strong>. No database keys are stored in source code or manual frontend forms.
+              </p>
+
+              <!-- Live Environment Connection Info Box -->
+              <div style="background:var(--bg-main);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:.9rem;margin-bottom:1.2rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;margin-bottom:.5rem">
+                  <span style="color:var(--text-muted)">Cloud Endpoint:</span>
+                  <code id="spbConfiguredUrl" style="font-size:.8rem;background:rgba(0,0,0,.06);padding:.15rem .4rem;border-radius:3px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Checking environment...</code>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;margin-bottom:.5rem">
+                  <span style="color:var(--text-muted)">Configuration Source:</span>
+                  <span id="spbConfigSource" style="font-weight:600;color:var(--accent-teal)">Render Environment</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem">
+                  <span style="color:var(--text-muted)">Realtime Sync:</span>
+                  <span id="spbRealtimeStatus" style="font-weight:600;color:var(--text-muted)">Active</span>
+                </div>
+              </div>
+
+              <!-- Database Actions -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+                <button type="button" onclick="handlePushToCloud(event)" class="btn-secondary" style="font-size:.82rem;padding:.5rem"><i class="fas fa-cloud-arrow-up"></i> Push to Cloud</button>
+                <button type="button" onclick="handlePullFromCloud(event)" class="btn-secondary" style="font-size:.82rem;padding:.5rem"><i class="fas fa-cloud-arrow-down"></i> Pull from Cloud</button>
+              </div>
+              <button type="button" onclick="handleTestSupabase(event)" class="btn-primary" style="width:100%;font-size:.85rem;padding:.6rem"><i class="fas fa-network-wired"></i> Test Cloud Connection</button>
+
+              <div style="margin-top:1rem;padding:.8rem;background:var(--bg-main);border-radius:var(--radius-sm);border:1px solid var(--border-color);font-size:.78rem;color:var(--text-muted);line-height:1.4">
+                <i class="fas fa-sliders-h" style="color:var(--accent-teal)"></i> <strong>Render Environment Settings:</strong> Update <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> directly in your <strong>Render Dashboard &gt; Environment</strong> to switch databases.
+              </div>
+            </div>
+
+            <div class="admin-panel-card" style="margin-bottom:1.5rem">
+              <h3 style="margin-bottom:.8rem;color:var(--primary)"><i class="fas fa-key" style="color:var(--accent-gold)"></i> Admin Authentication</h3>
+              <div style="font-size:.8rem;margin-bottom:1rem;color:var(--text-muted);background:rgba(230,171,44,.1);padding:.6rem .8rem;border-radius:var(--radius-sm);border-left:3px solid var(--accent-gold);line-height:1.4">
+                <i class="fas fa-shield-alt"></i> <strong>Render Managed:</strong> Admin username and password can be permanently configured via Render Environment (<code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code>).
+              </div>
+              <form onsubmit="handleChangePassword(event)">
+                <div class="form-group"><label class="form-label">Current Password *</label><input type="password" id="pwdCurrent" class="form-control" required></div>
+                <div class="form-group"><label class="form-label">New Password *</label><input type="password" id="pwdNew" class="form-control" required minlength="6"></div>
+                <div class="form-group"><label class="form-label">Confirm New Password *</label><input type="password" id="pwdConfirm" class="form-control" required minlength="6"></div>
+                <button type="submit" class="btn-primary" style="width:100%"><i class="fas fa-save"></i> Update Password in Browser</button>
+              </form>
+            </div>
+
+            <div class="admin-panel-card">
+              <h3 style="margin-bottom:1rem;color:var(--accent-crimson)"><i class="fas fa-database"></i> Backup &amp; Reset</h3>
+              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Export complete website data to a JSON backup file or restore official default seed data.</p>
+              <button type="button" onclick="exportAppData()" class="btn-secondary" style="width:100%;margin-bottom:.8rem"><i class="fas fa-download"></i> Download JSON Backup</button>
+              <button type="button" onclick="resetAppData()" class="btn-secondary" style="width:100%;color:var(--accent-crimson);border-color:var(--accent-crimson)"><i class="fas fa-rotate-left"></i> Reset to Seed Defaults</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /container -->
+  </div><!-- /adminView -->
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/seed-data.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

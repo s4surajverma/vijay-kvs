@@ -1,0 +1,26 @@
+{
+  "name": "pm-shri-kendriya-vidyalaya-portal",
+  "version": "2.0.0",
+  "description": "Production-ready Web Portal & CMS for PM SHRI Kendriya Vidyalaya Suranussi with Local-First & Supabase Cloud Sync.",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "kendriya-vidyalaya",
+    "pm-shri",
+    "school-portal",
+    "cms",
+    "supabase",
+    "github-pages",
+    "render"
+  ],
+  "author": "PM SHRI KV Suranussi Webmaster",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}

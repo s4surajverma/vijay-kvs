@@ -8,10 +8,11 @@
  * - Handles /api/config for runtime environment discovery
  */
 
-const http = require('http');
-const fs   = require('fs');
-const path = require('path');
-const url  = require('url');
+const http  = require('http');
+const https = require('https');
+const fs    = require('fs');
+const path  = require('path');
+const url   = require('url');
 
 // Run build script on boot to ensure js/config.js matches current environment variables
 try {
@@ -85,6 +86,68 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Image proxy endpoint for Google Drive & external images (bypasses Brave Shields & hotlinking blocks)
+  if (pathname === '/api/proxy-image') {
+    let targetId = '';
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      targetId = parsedUrl.searchParams.get('id') || '';
+      const rawUrl = parsedUrl.searchParams.get('url') || '';
+      if (!targetId && rawUrl) {
+        const match = rawUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) targetId = match[1];
+      }
+    } catch (e) {}
+
+    if (!targetId) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Missing Drive image id');
+      return;
+    }
+
+    function pipeUrl(targetUrl, maxRedirects) {
+      if (maxRedirects <= 0) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' });
+        res.end('Too many redirects');
+        return;
+      }
+      const client = targetUrl.startsWith('https') ? https : http;
+      client.get(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+        }
+      }, upstream => {
+        if (upstream.statusCode >= 300 && upstream.statusCode < 400 && upstream.headers.location) {
+          pipeUrl(upstream.headers.location, maxRedirects - 1);
+          return;
+        }
+        if (upstream.statusCode !== 200) {
+          // Fallback to drive thumbnail if lh3 fails
+          if (targetUrl.includes('lh3.googleusercontent.com')) {
+            pipeUrl(`https://drive.google.com/thumbnail?id=${targetId}&sz=w1200`, maxRedirects - 1);
+            return;
+          }
+          res.writeHead(upstream.statusCode, { 'Content-Type': 'text/plain' });
+          res.end('Upstream image error ' + upstream.statusCode);
+          return;
+        }
+        res.writeHead(200, {
+          'Content-Type': upstream.headers['content-type'] || 'image/jpeg',
+          'Cache-Control': 'public, max-age=604800, immutable',
+          'Access-Control-Allow-Origin': '*'
+        });
+        upstream.pipe(res);
+      }).on('error', err => {
+        res.writeHead(502, { 'Content-Type': 'text/plain' });
+        res.end('Proxy error: ' + err.message);
+      });
+    }
+
+    pipeUrl(`https://lh3.googleusercontent.com/d/${targetId}`, 3);
+    return;
+  }
+
   // Normalize path for static files
   if (pathname === '/' || pathname === '') {
     pathname = '/index.html';
@@ -110,8 +173,8 @@ const server = http.createServer((req, res) => {
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
     // Caching headers
-    if (ext === '.html') {
-      res.setHeader('Cache-Control', 'no-cache');
+    if (ext === '.html' || ext === '.js' || ext === '.css') {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     } else {
       res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
     }

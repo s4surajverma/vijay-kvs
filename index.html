@@ -48,14 +48,19 @@
     <nav class="vijay-navbar">
       <div class="container navbar-flex">
         <a href="#home" class="brand-link" onclick="event.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});">
-          <img src="assets/images/brand_emblem.png" alt="Emblem" style="height:46px;width:auto;flex-shrink:0;">
+          <img src="assets/images/brand_emblem.png" alt="Emblem" style="height:44px;width:auto;flex-shrink:0;">
           <div class="brand-text-col">
             <span class="brand-main-title">vijaysirkvs<span class="gold-dot">.com</span></span>
             <span class="brand-subtitle">Educator | School Leader | Lifelong Learner</span>
           </div>
         </a>
 
-        <ul class="vijay-nav-menu">
+        <!-- Mobile Navigation Toggle Button -->
+        <button class="nav-mobile-toggle" id="navMobileToggle" aria-label="Toggle navigation menu" title="Open Navigation Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <ul class="vijay-nav-menu" id="vijayNavMenu">
           <li><a href="#/" class="nav-link-btn active" data-page="home">Home</a></li>
           <li><a href="#/about" class="nav-link-btn" data-page="about">About Me</a></li>
           <li><a href="#/leadership" class="nav-link-btn" data-page="leadership">Academic Leadership</a></li>
@@ -64,7 +69,7 @@
           <li><a href="#/innovations" class="nav-link-btn" data-page="innovations">Innovations</a></li>
           <li><a href="#/gallery" class="nav-link-btn" data-page="gallery">Gallery</a></li>
           <li><a href="#/contact" class="nav-link-btn" data-page="contact">Contact</a></li>
-          <li><button onclick="handleNavLoginClick()" class="nav-admin-chip" title="Administrator Portal"><i class="fas fa-lock"></i> Admin</button></li>
+          <li class="nav-admin-li"><button onclick="handleNavLoginClick()" class="nav-admin-chip" title="Administrator Portal"><i class="fas fa-lock"></i> <span>Admin</span></button></li>
         </ul>
       </div>
     </nav>
@@ -256,12 +261,12 @@
       </div>
       <div class="container subpage-main-container">
         <div class="fullpage-card">
-          <div style="display:flex;gap:2.2rem;align-items:center;margin-bottom:2.5rem;flex-wrap:wrap">
-            <img src="assets/images/vijay_kumar_desk_hd.png" alt="Vijay Kumar" style="width:145px;height:145px;border-radius:50%;object-fit:cover;border:4px solid #dfa83b;box-shadow:0 8px 24px rgba(14,38,62,0.12)">
-            <div style="flex:1">
-              <h2 style="font-size:1.85rem;color:var(--primary);margin-bottom:0.35rem">Vijay Kumar</h2>
-              <p style="font-weight:700;color:#dfa83b;font-size:1.05rem;margin-bottom:0.75rem">Headmaster &bull; Foundational &amp; Preparatory Stage</p>
-              <p style="font-size:0.98rem;color:var(--text-muted);line-height:1.75" id="aboutBioFull">
+          <div class="about-profile-header">
+            <img src="assets/images/vijay_kumar_desk_hd.png" alt="Vijay Kumar" class="about-profile-avatar">
+            <div class="about-profile-info">
+              <h2 class="about-profile-name">Vijay Kumar</h2>
+              <p class="about-profile-role">Headmaster &bull; Foundational &amp; Preparatory Stage</p>
+              <p class="about-profile-bio" id="aboutBioFull">
                 Passionate educator and dedicated school leader committed to foundational literacy, child-centric learning environments, and empowering primary teachers through continuous professional development.
               </p>
             </div>
@@ -398,7 +403,7 @@
         </div>
       </div>
       <div class="container subpage-main-container">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.8rem">
+        <div class="innovations-cards-grid">
           <div class="fullpage-card">
             <h3 style="color:var(--primary);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.6rem">
               <i class="fas fa-cubes" style="color:#dfa83b"></i> Toy-Based Pedagogy &amp; Puppet Corner
@@ -451,8 +456,8 @@
         </div>
       </div>
       <div class="container subpage-main-container">
-        <div class="gallery-filters" id="modalGalleryFilters" style="margin-bottom:2rem">
-          <!-- Filter buttons -->
+        <div class="gallery-filters" id="modalGalleryFilters">
+          <!-- Filter buttons rendered dynamically -->
         </div>
         <div class="gallery-grid" id="modalGalleryGrid">
           <!-- Populated dynamically from DB.getData().gallery -->
@@ -477,7 +482,7 @@
       </div>
       <div class="container subpage-main-container">
         <div class="fullpage-card">
-          <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:3rem">
+          <div class="contact-two-columns">
             <div>
               <h3 style="color:var(--primary);margin-bottom:1.5rem;font-size:1.3rem">Direct Contact Details</h3>
               <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-start">
@@ -666,12 +671,16 @@
   <!-- ── UNIVERSAL VIEWER MODAL (Images + PDFs) ── -->
   <div id="viewerModal" class="modal-backdrop" onclick="if(event.target===this)closeViewer()">
     <div class="modal-content viewer-modal-content" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeViewer()"><i class="fas fa-times"></i></button>
-      <img id="viewerImg" src="" alt="Gallery Preview" style="width:100%;border-radius:var(--radius-md) var(--radius-md) 0 0;max-height:65vh;object-fit:cover;display:block">
-      <iframe id="viewerIframe" src="" style="width:100%;height:70vh;border:none;border-radius:var(--radius-md) var(--radius-md) 0 0;display:none" allowfullscreen></iframe>
-      <div style="padding:1.5rem">
-        <h3 id="viewerTitle" style="font-size:1.4rem;color:var(--primary);margin-bottom:.5rem"></h3>
-        <p id="viewerCaption" style="color:var(--text-muted);font-size:.95rem"></p>
+      <button class="viewer-close-btn" onclick="closeViewer()" aria-label="Close Preview" title="Close Preview">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="viewer-media-stage">
+        <img id="viewerImg" src="" alt="Gallery Preview" class="viewer-media-img">
+        <iframe id="viewerIframe" src="" class="viewer-media-iframe" allowfullscreen></iframe>
+      </div>
+      <div class="viewer-meta-stage">
+        <h3 id="viewerTitle" class="viewer-title"></h3>
+        <p id="viewerCaption" class="viewer-caption"></p>
       </div>
     </div>
   </div>

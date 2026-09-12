@@ -7,6 +7,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   checkExistingSession();
+  initMobileNav();
   renderAllSections();
   refreshCategoryDropdowns();
   initRouter();
@@ -34,8 +35,46 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       handleNavLoginClick();
     }
+    if (e.key === 'Escape') {
+      closeViewer();
+      if (typeof closeLoginModal === 'function') closeLoginModal();
+    }
   });
 });
+
+/* ── Mobile Navigation Toggle & Drawer Handler ───────────────── */
+function initMobileNav() {
+  const toggleBtn = document.getElementById('navMobileToggle');
+  const navMenu = document.getElementById('vijayNavMenu');
+  if (!toggleBtn || !navMenu) return;
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navMenu.classList.toggle('mobile-open');
+    const isOpen = navMenu.classList.contains('mobile-open');
+    toggleBtn.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+    toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  // Close when clicking anywhere outside
+  document.addEventListener('click', (e) => {
+    if (navMenu.classList.contains('mobile-open') && !navMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+      navMenu.classList.remove('mobile-open');
+      toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close when a nav link is clicked
+  navMenu.querySelectorAll('.nav-link-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navMenu.classList.remove('mobile-open');
+      toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+}
 
 /* ── Google Drive URL Converter & Fallback Handlers ──────────── */
 function getDriveId(raw) {
@@ -308,7 +347,9 @@ function handleHashRouting() {
   } else if (pageId === 'training') {
     renderModalAnnouncements(d.announcements);
   } else if (pageId === 'gallery') {
-    renderModalGallery(d.gallery);
+    const catParam = params.get('cat') || params.get('category');
+    if (catParam) currentGalleryCategory = catParam;
+    renderModalGallery(d.gallery, currentGalleryCategory);
   }
 
   // Smooth scroll to top on page switch
@@ -344,7 +385,7 @@ function renderAllSections() {
   renderModalInitiatives(d.initiatives);
   renderModalResources();
   renderModalAnnouncements(d.announcements);
-  renderModalGallery(d.gallery);
+  renderModalGallery(d.gallery, currentGalleryCategory);
 }
 
 function _escapeHtml(str) {
@@ -581,38 +622,102 @@ function renderModalAnnouncements(list) {
   }).join('');
 }
 
-function renderModalGallery(list, cat = 'All') {
+/* ── Gallery Filtering & Render Logic ────────────────────────── */
+let currentGalleryCategory = 'All';
+
+function getCategoryIcon(cat) {
+  const c = (cat || '').toLowerCase().trim();
+  if (c === 'all' || c === 'all photos') return 'fas fa-th-large';
+  if (c.includes('shri')) return 'fas fa-school';
+  if (c.includes('fln') || c.includes('activit') || c.includes('toy')) return 'fas fa-shapes';
+  if (c.includes('campus') || c.includes('infra') || c.includes('building')) return 'fas fa-landmark';
+  if (c.includes('event') || c.includes('celebrat') || c.includes('annual')) return 'fas fa-calendar-check';
+  if (c.includes('classroom') || c.includes('moment')) return 'fas fa-chalkboard-teacher';
+  if (c.includes('training') || c.includes('cpd') || c.includes('workshop')) return 'fas fa-user-graduate';
+  if (c.includes('leader') || c.includes('award') || c.includes('achievement')) return 'fas fa-medal';
+  return 'fas fa-images';
+}
+
+function filterGallery(cat) {
+  currentGalleryCategory = cat || 'All';
+  const d = DB.getData();
+  renderModalGallery(d.gallery || [], currentGalleryCategory);
+}
+window.filterGallery = filterGallery;
+window.getCategoryIcon = getCategoryIcon;
+
+function renderModalGallery(list, cat) {
+  if (cat !== undefined && cat !== null && cat !== '') {
+    currentGalleryCategory = cat;
+  } else {
+    cat = currentGalleryCategory || 'All';
+  }
+
   const filterEl = document.getElementById('modalGalleryFilters');
   const gridEl = document.getElementById('modalGalleryGrid');
   if (!list) return;
 
   if (filterEl) {
-    const rawCategories = list.map(i => i.category).filter(Boolean);
+    const rawCategories = list.map(i => (i.category || '').trim()).filter(Boolean);
     const uniqueCats = ['All', ...new Set(rawCategories)];
-    filterEl.innerHTML = uniqueCats.map(c => `
-      <button class="filter-btn ${c === cat ? 'active' : ''}" onclick="renderModalGallery(DB.getData().gallery, '${c}')">
-        ${c === 'All' ? 'All Photos' : c}
-      </button>
-    `).join('');
+
+    // Precalculate item counts for badges
+    const counts = { 'All': list.length };
+    list.forEach(i => {
+      const c = (i.category || '').trim();
+      if (c) counts[c] = (counts[c] || 0) + 1;
+    });
+
+    filterEl.innerHTML = uniqueCats.map(c => {
+      const isSelected = (c.toLowerCase() === cat.toLowerCase());
+      const icon = getCategoryIcon(c);
+      const count = counts[c] || 0;
+      const label = (c === 'All') ? 'All Photos' : _escapeHtml(c);
+      const safeCat = c.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `<button type="button" class="filter-btn ${isSelected ? 'active' : ''}" data-category="${_escapeHtml(c)}" onclick="filterGallery('${safeCat}')">
+        <i class="${icon}"></i>
+        <span>${label}</span>
+        <span class="cat-count-badge">${count}</span>
+      </button>`;
+    }).join('');
   }
 
   if (!gridEl) return;
-  const items = cat === 'All' ? list : list.filter(i => i.category === cat);
+  const isAll = (cat.toLowerCase() === 'all');
+  const items = isAll
+    ? list
+    : list.filter(i => (i.category || '').trim().toLowerCase() === cat.trim().toLowerCase());
+
+  if (items.length === 0) {
+    gridEl.innerHTML = `
+      <div class="gallery-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1rem; color: var(--text-muted);">
+        <i class="fas fa-images" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem; display: block;"></i>
+        <h4 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 0.5rem;">No Photos in "${_escapeHtml(cat)}"</h4>
+        <p style="font-size: 0.95rem; margin-bottom: 1.5rem;">There are currently no photos categorized under this section.</p>
+        <button type="button" class="filter-btn active" onclick="filterGallery('All')" style="display: inline-flex; margin: 0 auto;">
+          <i class="fas fa-th-large"></i> <span>View All Photos (${list.length})</span>
+        </button>
+      </div>`;
+    return;
+  }
+
   gridEl.innerHTML = items.map(item => {
     const isDrive = isDriveUrl(item.srcUrl);
     const driveId = isDrive ? getDriveId(item.srcUrl) : null;
     const src = isDrive ? convertDriveUrl(item.srcUrl, 'image') : (item.srcUrl || item.image || '');
     const safeTitle = (item.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const safeCaption = (item.caption || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const catIcon = getCategoryIcon(item.category);
     return `<div class="gallery-item" onclick="openViewer('${item.srcUrl}','${safeTitle}','${safeCaption}','${item.type || 'photo'}')">
-      <img src="${src}" alt="${item.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" referrerpolicy="no-referrer" loading="lazy">
+      <img src="${src}" alt="${_escapeHtml(item.title || 'Photo')}" onerror="handleDriveImgError(this, '${driveId || ''}')" referrerpolicy="no-referrer" loading="lazy">
       <div class="gallery-overlay">
-        <span style="font-size:.75rem;color:var(--accent-gold);font-weight:700">${item.category}</span>
-        <div class="gallery-caption">${item.title}</div>
+        <span class="gallery-cat-chip"><i class="${catIcon}"></i> ${_escapeHtml(item.category || 'Gallery')}</span>
+        <div class="gallery-caption">${_escapeHtml(item.title || '')}</div>
       </div>
     </div>`;
   }).join('');
 }
+window.renderModalGallery = renderModalGallery;
 
 /* ── Universal Media Viewer (image + PDF iframe) ─────────────── */
 function openViewer(rawUrl, title, caption, type) {
@@ -638,6 +743,7 @@ function openViewer(rawUrl, title, caption, type) {
     imgEl.src = isDriveUrl(rawUrl) ? convertDriveUrl(rawUrl, 'image') : rawUrl;
   }
   modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeViewer() {
@@ -647,7 +753,10 @@ function closeViewer() {
     const ifr = document.getElementById('viewerIframe');
     if (ifr) ifr.src = '';
   }
+  document.body.style.overflow = '';
 }
+window.openViewer = openViewer;
+window.closeViewer = closeViewer;
 
 /* ── Contact Form Submission ──────────────────────────────────── */
 async function handlePublicContactSubmit(e) {

@@ -592,3 +592,10 @@ const DB = (() => {
   };
 
 })();
+
+if (typeof window !== 'undefined') {
+  window.DB = DB;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.DB = DB;
+}

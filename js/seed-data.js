@@ -230,3 +230,10 @@ const DEFAULT_SEED_DATA = {
 
   inquiries: []
 };
+
+if (typeof window !== 'undefined') {
+  window.DEFAULT_SEED_DATA = DEFAULT_SEED_DATA;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.DEFAULT_SEED_DATA = DEFAULT_SEED_DATA;
+}

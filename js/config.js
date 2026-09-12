@@ -16,7 +16,7 @@ window.APP_CONFIG = {
   adminPassword: "kvs@2024",
   schoolName: "",
   isConfiguredViaEnv: false,
-  buildTime: "2026-09-12T12:39:20.783Z"
+  buildTime: "2026-09-12T13:57:51.178Z"
 };
 
 // Backwards compatibility alias for Supabase config

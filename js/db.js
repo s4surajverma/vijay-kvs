@@ -11,11 +11,11 @@
 const DB = (() => {
 
   /* ── Storage Keys ──────────────────────────────────────────── */
-  const DATA_KEY         = 'PM_SHRI_KVS_DATA_V2';
-  const AUTH_KEY         = 'PM_SHRI_KVS_AUTH_V1';
-  const SESSION_KEY      = 'PM_SHRI_KVS_SESSION';
-  const SUPABASE_CFG_KEY = 'PM_SHRI_KVS_SUPABASE_CFG_V1';
-  const OLD_KEY          = 'PM_SHRI_KVS_SURANUSSI_DATA_V1'; // legacy migration
+  const DATA_KEY         = 'VIJAYSIRKVS_DATA_V5';
+  const AUTH_KEY         = 'VIJAYSIRKVS_AUTH_V1';
+  const SESSION_KEY      = 'VIJAYSIRKVS_SESSION';
+  const SUPABASE_CFG_KEY = 'VIJAYSIRKVS_SUPABASE_CFG_V1';
+  const OLD_KEY          = 'VIJAYSIRKVS_DATA_V4'; // migration
 
   /* ── Cloud Supabase State ───────────────────────────────────── */
   let _supabaseClient   = null;
@@ -105,34 +105,26 @@ const DB = (() => {
   /* ── Site Data & Local Cache ──────────────────────────────── */
 
   /**
-   * Merge an existing (possibly older-schema) data object with the
-   * current DEFAULT_SEED_DATA so new fields are always present.
+   * Merge an existing data object with DEFAULT_SEED_DATA so new fields are always present.
    */
   function _mergeWithDefaults(existing) {
     const d = JSON.parse(JSON.stringify(DEFAULT_SEED_DATA));
+    if (!existing || typeof existing !== 'object') return d;
     return {
       ...d,
       ...existing,
-      schoolInfo: {
-        ...d.schoolInfo,
-        ...(existing.schoolInfo || {}),
-        managedBy: existing.schoolInfo?.managedBy || existing.managedBy || d.schoolInfo.managedBy,
-        campusImage: existing.schoolInfo?.campusImage || d.schoolInfo.campusImage
+      profile: {
+        ...d.profile,
+        ...(existing.profile || {})
       },
       heroSection: {
         ...d.heroSection,
-        ...(existing.heroSection || {}),
-        backgroundImage: existing.heroSection?.backgroundImage || d.heroSection.backgroundImage
+        ...(existing.heroSection || {})
       },
-      principalMessage: {
-        ...d.principalMessage,
-        ...(existing.principalMessage || {})
-      },
-      statsBar:      existing.statsBar      || d.statsBar,
       // Preserve all user-edited arrays
+      menus:         existing.menus         || d.menus,
       announcements: existing.announcements || d.announcements,
       initiatives:   existing.initiatives   || d.initiatives,
-      staff:         existing.staff         || d.staff,
       gallery:       existing.gallery       || d.gallery,
       resources:     existing.resources     || d.resources,
       inquiries:     existing.inquiries     || d.inquiries,
@@ -147,7 +139,7 @@ const DB = (() => {
       const saved = localStorage.getItem(DATA_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (!parsed.heroSection?.backgroundImage || !parsed.schoolInfo?.campusImage || !parsed.schoolInfo?.subtitle || parsed.schoolInfo?.isPmShri === undefined || !parsed.schoolInfo?.managedBy) {
+        if (!parsed.profile || !parsed.announcements || !parsed.resources) {
           const merged = _mergeWithDefaults(parsed);
           _saveLocalData(merged);
           return merged;
@@ -155,7 +147,7 @@ const DB = (() => {
         return parsed;
       }
 
-      // Attempt one-time migration from V1 key
+      // Attempt one-time migration from older key
       const legacy = localStorage.getItem(OLD_KEY);
       if (legacy) {
         const merged = _mergeWithDefaults(JSON.parse(legacy));
@@ -245,8 +237,8 @@ const DB = (() => {
   function importJSON(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
-      if (parsed.schoolInfo && parsed.announcements) {
-        saveData(parsed);
+      if ((parsed.profile || parsed.schoolInfo) && parsed.announcements) {
+        saveData(_mergeWithDefaults(parsed));
         return true;
       }
     } catch (e) {

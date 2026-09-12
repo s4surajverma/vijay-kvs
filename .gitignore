@@ -1,0 +1,28 @@
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# Editor & IDE configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+
+# Node / Dependency directories (if using npm / serve)
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Antigravity IDE / Brain internal scratch & logs
+.gemini/
+*.log
+
+# Sensitive credentials & environment overrides (optional override files)
+.env
+.env.local
+.env.*.local

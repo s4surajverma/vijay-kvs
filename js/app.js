@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkExistingSession();
   renderAllSections();
   refreshCategoryDropdowns();
+  initRouter();
 
   const navLogin = document.getElementById('navLoginBtn');
   if (navLogin) {
@@ -25,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('pm_shri_supabase_state', e => {
     updateSupabaseStatusBadge(e.detail);
+  });
+
+  // Global keyboard shortcut for admin portal (Ctrl+Shift+A)
+  window.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+      e.preventDefault();
+      handleNavLoginClick();
+    }
   });
 });
 
@@ -107,13 +116,14 @@ function checkExistingSession() {
 }
 
 function _setNavLoggedIn(in_) {
-  const btn = document.getElementById('navLoginBtn');
-  if (!btn) return;
-  if (in_) {
-    btn.innerHTML = `<i class="fas fa-tachometer-alt"></i> Dashboard`;
-  } else {
-    btn.innerHTML = `<i class="fas fa-user-lock"></i> Login`;
-  }
+  const btns = document.querySelectorAll('.btn-nav-admin, #navLoginBtn, .topbar-admin-btn, .nav-admin-chip');
+  btns.forEach(btn => {
+    if (in_) {
+      btn.innerHTML = `<i class="fas fa-tachometer-alt"></i> Dashboard`;
+    } else {
+      btn.innerHTML = `<i class="fas fa-lock"></i> Admin Portal`;
+    }
+  });
 }
 
 function handleNavLoginClick() {
@@ -187,291 +197,408 @@ function handleLoginSubmit(e) {
 
 /* ── Admin View Show / Hide ──────────────────────────────────── */
 function showAdminView() {
-  document.getElementById('publicView').style.display = 'none';
+  const pub = document.getElementById('publicView');
+  if (pub) pub.style.display = 'none';
   const av = document.getElementById('adminView');
-  av.classList.add('active');
+  if (av) {
+    av.classList.add('active');
+    av.style.display = 'block';
+  }
+  _setNavLoggedIn(true);
   renderAdminDashboard();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 function exitAdminView() {
   Auth.logout();
   _setNavLoggedIn(false);
-  document.getElementById('adminView').classList.remove('active');
-  document.getElementById('publicView').style.display = 'block';
+  const av = document.getElementById('adminView');
+  if (av) {
+    av.classList.remove('active');
+    av.style.display = 'none';
+  }
+  const pub = document.getElementById('publicView');
+  if (pub) pub.style.display = 'block';
+  window.location.hash = '#/';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Dedicated Full-Page SPA Router ───────────────────────────── */
+function initRouter() {
+  window.addEventListener('hashchange', handleHashRouting);
+  handleHashRouting();
+}
+
+function handleHashRouting() {
+  const raw = window.location.hash || '#/';
+  // Normalize route string (e.g. '#/about?section=journey' -> 'about')
+  let clean = raw.replace(/^#\/?/, '').split('?')[0].trim().toLowerCase();
+  if (clean === '' || clean === 'home') clean = 'home';
+
+  // Support direct routing to admin or login
+  if (clean === 'admin' || clean === 'login') {
+    if (Auth.isLoggedIn()) {
+      showAdminView();
+    } else {
+      const pub = document.getElementById('publicView');
+      if (pub) pub.style.display = 'block';
+      const av = document.getElementById('adminView');
+      if (av) {
+        av.classList.remove('active');
+        av.style.display = 'none';
+      }
+      openLoginModal();
+    }
+    return;
+  }
+
+  // When visiting any public page, ensure publicView is visible and adminView is hidden
+  const pub = document.getElementById('publicView');
+  if (pub) pub.style.display = 'block';
+  const av = document.getElementById('adminView');
+  if (av) {
+    av.classList.remove('active');
+    av.style.display = 'none';
+  }
+
+  // Extract optional query param (e.g. ?section=qualifications)
+  const queryStr = raw.includes('?') ? raw.split('?')[1] : '';
+  const params = new URLSearchParams(queryStr);
+  const subtab = params.get('section');
+
+  const validPages = ['home', 'about', 'leadership', 'resources', 'training', 'innovations', 'gallery', 'contact'];
+  const pageId = validPages.includes(clean) ? clean : 'home';
+
+  // Toggle active class across full-page views
+  document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  const targetPage = document.getElementById(`page-${pageId}`);
+  if (targetPage) targetPage.classList.add('active');
+
+  // Highlight active navbar link
+  document.querySelectorAll('.vijay-nav-menu .nav-link-btn').forEach(btn => {
+    if (btn.getAttribute('data-page') === pageId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Ensure fresh content is rendered for the target page
+  const d = DB.getData();
+  if (pageId === 'home') {
+    renderHomepageProfile(d.profile);
+    renderLatestUpdates(d.announcements);
+  } else if (pageId === 'about') {
+    renderModalAbout(d.profile);
+    if (subtab) {
+      setTimeout(() => {
+        const targetSec = document.getElementById(`profSection_${subtab}`);
+        if (targetSec) {
+          targetSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetSec.style.outline = '3px solid #dfa83b';
+          targetSec.style.transition = 'outline 0.3s ease';
+          setTimeout(() => { targetSec.style.outline = 'none'; }, 2200);
+        }
+      }, 200);
+    }
+  } else if (pageId === 'leadership') {
+    renderModalInitiatives(d.initiatives);
+  } else if (pageId === 'resources') {
+    renderModalResources();
+  } else if (pageId === 'training') {
+    renderModalAnnouncements(d.announcements);
+  } else if (pageId === 'gallery') {
+    renderModalGallery(d.gallery);
+  }
+
+  // Smooth scroll to top on page switch
+  if (!subtab) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function navigateTo(page, subtab) {
+  if (subtab) {
+    window.location.hash = `#/${page}?section=${subtab}`;
+  } else {
+    window.location.hash = `#/${page}`;
+  }
+}
+
+// Backward compatibility helpers
+function openSubpage(type, subtab) {
+  navigateTo(type, subtab);
+}
+
+function closeSubpage() {
+  navigateTo('home');
 }
 
 /* ── Render All Public Sections ──────────────────────────────── */
 function renderAllSections() {
   const d = DB.getData();
-  renderTicker(d.announcements);
-  renderHeroSection(d.heroSection);
-  renderStatsBar(d.statsBar);
-  renderSchoolInfo(d.schoolInfo);
-  renderPrincipalMessage(d.principalMessage);
-  renderAnnouncements(d.announcements);
-  renderInitiatives(d.initiatives);
-  renderStaffDirectory(d.staff);
-  renderGallery(d.gallery);
-  renderResources(d.resources);
+  renderNavigationMenus(d.menus);
+  renderHomepageProfile(d.profile);
+  renderLatestUpdates(d.announcements);
+  renderModalAbout(d.profile);
+  renderModalInitiatives(d.initiatives);
+  renderModalResources();
+  renderModalAnnouncements(d.announcements);
+  renderModalGallery(d.gallery);
 }
 
-/* ── Hero Section ─────────────────────────────────────────────── */
-function renderHeroSection(h) {
-  if (!h) return;
-  const badge = document.getElementById('heroBadgeText');
-  const title = document.getElementById('heroTitleText');
-  const span  = document.getElementById('heroTitleSpan');
-  const desc  = document.getElementById('heroDescText');
-  const overlay = document.getElementById('heroOverlay');
+function _escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  if (badge) badge.textContent = h.badge || '';
-  if (span) {
-    if (h.title && h.title.toLowerCase().startsWith('welcome to ')) {
-      span.textContent = h.title.substring(11);
-    } else {
-      span.textContent = h.title || '';
+function renderNavigationMenus(menus) {
+  if (!menus || !Array.isArray(menus)) {
+    const d = DB.getData();
+    menus = d.menus || (typeof DEFAULT_SEED_DATA !== 'undefined' ? DEFAULT_SEED_DATA.menus : []);
+  }
+  if (!menus || !menus.length) return;
+
+  menus.forEach(item => {
+    // 1. Top sticky navbar link
+    const navBtn = document.querySelector(`.vijay-nav-menu .nav-link-btn[data-page="${item.id}"]`);
+    if (navBtn) {
+      navBtn.textContent = item.label;
     }
-  } else if (title) {
-    title.textContent = h.title || '';
-  }
-  if (desc) desc.textContent = h.description || '';
 
-  if (overlay) {
-    const bg = h.backgroundImage || 'assets/images/kv_campus.jpg';
-    const bgUrl = isDriveUrl(bg) ? convertDriveUrl(bg, 'image') : bg;
-    overlay.style.backgroundImage = `url('${bgUrl}')`;
-  }
-}
+    // 2. Footer quick links
+    const footerLinks = document.querySelectorAll(`.footer-links-list a[href="${item.href}"]`);
+    footerLinks.forEach(fl => {
+      fl.textContent = item.label;
+    });
 
-/* ── Stats Bar ───────────────────────────────────────────────── */
-function renderStatsBar(stats) {
-  const grid = document.getElementById('statsBarGrid');
-  if (!grid || !stats) return;
-  grid.innerHTML = stats.map(s => `
-    <div class="stat-card">
-      <div class="stat-number">${s.value}</div>
-      <div class="stat-label">${s.label}</div>
-    </div>`).join('');
-}
-
-/* ── Ticker ──────────────────────────────────────────────────── */
-function renderTicker(items) {
-  const el = document.getElementById('tickerContent');
-  if (!el || !items) return;
-  const html = items.map(a => `
-    <div class="ticker-item">
-      <i class="fas fa-bullhorn" style="color:var(--accent-gold)"></i>
-      <strong>[${a.displayDate || a.date}]</strong> ${a.title}
-      ${a.linkUrl && a.linkUrl !== '#' ? `<a href="${a.linkUrl}" target="_blank">View <i class="fas fa-external-link-alt"></i></a>` : ''}
-    </div>`).join('');
-  el.innerHTML = html + html;
-}
-
-/* ── School Info ──────────────────────────────────────────────── */
-function renderSchoolInfo(info) {
-  if (!info) return;
-  _setText('schoolNameText', info.name);
-  _setText('schoolTaglineText', info.tagline || `${info.sector || 'Defense Sector'} • Est. ${info.established || '1979'} • ${info.affiliation || ''}`);
-  
-  // Badge handling
-  const badgeTag  = document.getElementById('schoolBadgeTag');
-  const badgeIcon = document.getElementById('schoolBadgeIcon');
-  const badgeText = document.getElementById('schoolBadgeText');
-  
-  if (badgeTag) {
-    if (info.showBadge === false) {
-      badgeTag.style.display = 'none';
-    } else {
-      badgeTag.style.display = 'inline-flex';
-      const isPm = info.isPmShri !== false;
-      if (isPm) {
-        badgeTag.className = 'school-badge-tag badge-pm-shri';
-        if (badgeIcon) badgeIcon.className = 'fas fa-certificate';
-        if (badgeText) badgeText.textContent = info.badgeText || 'PM SHRI CENTER OF EDUCATIONAL EXCELLENCE';
-      } else {
-        badgeTag.className = 'school-badge-tag badge-normal-kv';
-        if (badgeIcon) badgeIcon.className = 'fas fa-award';
-        if (badgeText) badgeText.textContent = info.badgeText || 'KENDRIYA VIDYALAYA SANGATHAN • CENTER OF EXCELLENCE';
+    // 3. Homepage Linked Category Cards (5 Colorful Cards)
+    const catCard = document.querySelector(`.category-cards-grid a[href="${item.href}"]`);
+    if (catCard) {
+      const titleEl = catCard.querySelector('.cat-card-title');
+      if (titleEl) {
+        titleEl.textContent = item.cardTitle || item.label;
+      }
+      const descEl = catCard.querySelector('.cat-card-desc');
+      if (descEl && item.cardDesc) {
+        descEl.textContent = item.cardDesc;
       }
     }
-  }
 
-  // Navigation initiatives text
-  _setText('navInitiativesText', info.isPmShri !== false ? 'PM SHRI Initiatives' : 'Key Initiatives');
-
-  // Hero primary button
-  const heroBtn = document.getElementById('heroPrimaryBtn');
-  if (heroBtn) heroBtn.innerHTML = `<i class="fas fa-compass"></i> ${info.isPmShri !== false ? 'Explore PM SHRI Initiatives' : 'Explore Key Initiatives'}`;
-
-  // About section
-  _setText('aboutTitleText', `About ${info.name || 'Our Vidyalaya'}`);
-  _setText('aboutSubtitleText', info.subtitle || `A premier ${info.sector || 'Defense Sector'} Kendriya Vidyalaya in ${info.region || 'Jalandhar Region'}`);
-  _setText('schoolHistoryText', info.history);
-  _setText('schoolVisionText',  info.vision);
-  _setText('schoolMissionText', info.mission);
-
-  const campusImg = document.getElementById('aboutCampusImg');
-  if (campusImg) {
-    const cImg = info.campusImage || 'assets/images/kv_campus.jpg';
-    const driveId = isDriveUrl(cImg) ? getDriveId(cImg) : null;
-    campusImg.onerror = () => { handleDriveImgError(campusImg, driveId); };
-    campusImg.src = isDriveUrl(cImg) ? convertDriveUrl(cImg, 'image') : cImg;
-  }
-
-  // Initiatives section title
-  _setText('initiativesTitleText', info.isPmShri !== false ? 'PM SHRI Key Initiatives' : 'Key Vidyalaya Initiatives');
-
-  // Gallery subtitle
-  _setText('gallerySubtitle', `Capturing the vibrant learning environment at ${info.shortName || info.name}`);
-
-  // Contact details
-  _setText('contactAddressText', info.address || '');
-  _setText('contactPhoneText',   info.phone || '');
-  _setText('contactEmailText',   info.email || '');
-  _setText('contactHoursText',   info.workingHours || 'Monday - Saturday: 7:30 AM - 1:40 PM');
-
-  // Footer
-  _setText('footerSchoolName', info.name);
-  _setText('footerSchoolDesc', info.footerDescription || `Empowering children through quality education, national integration, and innovative pedagogy. A premier ${info.isPmShri !== false ? 'PM SHRI ' : ''}Kendriya Vidyalaya.`);
-  _setText('footerCopyright',  `© ${new Date().getFullYear()} ${info.name}. All Rights Reserved. Designed with modern web standards.`);
-  _setText('footerInitiativesLink', info.isPmShri !== false ? 'PM SHRI Initiatives' : 'Key Initiatives');
-
-  // Website Managed By Attribution
-  const mb = info.managedBy || { name: 'Vijay Kumar', designation: 'HM', kvName: 'PM SHRI KV Suranussi', show: true };
-  const mbSec = document.getElementById('footerManagedBySection');
-  if (mbSec) {
-    if (mb.show === false) {
-      mbSec.style.display = 'none';
-    } else {
-      mbSec.style.display = 'flex';
-      _setText('footerManagedByName', mb.name || 'Vijay Kumar');
-      _setText('footerManagedByDesig', mb.designation || 'HM');
-      _setText('footerManagedByKv', mb.kvName || info.shortName || info.name || 'PM SHRI KV Suranussi');
+    // 4. Homepage Middle Column: About Me Card Heading
+    if (item.id === 'about') {
+      const midAboutTitle = document.querySelector('.mid-about-title');
+      if (midAboutTitle) {
+        midAboutTitle.textContent = item.cardTitle || item.label;
+      }
     }
-  }
 
-  // Page title & meta
-  document.title = `${info.name} | Administrator Web Portal`;
-  const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) metaDesc.setAttribute('content', `Official Portal of ${info.name}. Excellence in education, holistic pedagogy, and academic development.`);
-
-  // Admin workplace display
-  _setText('adminWorkplaceDisplay', `Current Workplace: ${info.shortName || info.name}`);
-  _setText('loginModalSubtitle', `${info.shortName || info.name} — Content Management`);
+    // 5. Subpage hero banners & breadcrumbs
+    const pageView = document.getElementById(`page-${item.id}`);
+    if (pageView && item.id !== 'home') {
+      const heroTitle = pageView.querySelector('.subpage-hero-title');
+      if (heroTitle) {
+        heroTitle.textContent = item.cardTitle || item.label;
+      }
+      const breadcrumbTrail = pageView.querySelector('.breadcrumb-trail');
+      if (breadcrumbTrail) {
+        breadcrumbTrail.innerHTML = `<a href="#/">Home</a> / <span>${_escapeHtml(item.label)}</span>`;
+      }
+    }
+  });
 }
+
 function _setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val || ''; }
+function _setNum(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+function _setChecked(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
+function _setVal(id, val) { const el = document.getElementById(id); if (el) el.value = (val !== undefined && val !== null) ? val : ''; }
 
-/* ── Principal ───────────────────────────────────────────────── */
-function renderPrincipalMessage(p) {
-  if (!p) return;
-  _setText('principalName',  p.name);
-  _setText('principalTitle', p.title);
-  const q = document.getElementById('principalQuote');
-  if (q) q.textContent = `"${p.quote}"`;
-  const img = document.getElementById('principalImg');
-  if (img) {
-    const driveId = isDriveUrl(p.image) ? getDriveId(p.image) : null;
-    img.onerror = () => { handleDriveImgError(img, driveId); };
-    img.src = isDriveUrl(p.image) ? convertDriveUrl(p.image, 'image') : (p.image || 'assets/images/principal.png');
+function renderHomepageProfile(prof) {
+  if (!prof) return;
+  _setText('homeBioSnippet', prof.bio);
+  _setText('homeQuoteText', prof.quote);
+  _setText('footerAddressText', prof.address ? prof.address.replace(/,\s*/g, ',\n') : 'PM SHRI Kendriya Vidyalaya Suranussi, Jalandhar');
+  const emailEl = document.getElementById('footerEmailLink');
+  if (emailEl) {
+    emailEl.textContent = prof.email || 'vijaykumar.edu@gmail.com';
+    emailEl.href = `mailto:${prof.email || 'vijaykumar.edu@gmail.com'}`;
   }
-  const content = document.getElementById('principalContent');
-  if (content) content.innerHTML = p.content.split('\n\n').map(para => `<p style="margin-bottom:1rem">${para.replace(/\n/g,'<br>')}</p>`).join('');
+
+  const fbLinks = document.querySelectorAll('.soc-icon.fb, #topbarSocialFb, #footerSocialFb');
+  fbLinks.forEach(el => { el.href = prof.facebook || 'https://facebook.com'; });
+
+  const ytLinks = document.querySelectorAll('.soc-icon.yt, #topbarSocialYt, #footerSocialYt');
+  ytLinks.forEach(el => { el.href = prof.youtube || 'https://youtube.com'; });
+
+  const igLinks = document.querySelectorAll('.soc-icon.ig, #topbarSocialIg, #footerSocialIg');
+  igLinks.forEach(el => { el.href = prof.instagram || 'https://instagram.com'; });
 }
 
-/* ── Announcements ───────────────────────────────────────────── */
-function renderAnnouncements(list) {
-  const el = document.getElementById('announcementsContainer');
-  if (!el) return;
-  if (!list || !list.length) { el.innerHTML = `<p class="text-muted">No announcements currently.</p>`; return; }
-  el.innerHTML = list.map(a => {
-    const parts = (a.displayDate || a.date).split('.');
-    return `<div class="announcement-card">
-      <div class="ann-date-box">
-        <span class="ann-date-day">${parts[0] || '01'}</span>
-        <span class="ann-date-sub">${parts.slice(1).join('/') || '01/2025'}</span>
+function renderLatestUpdates(list) {
+  const el = document.getElementById('homeLatestUpdatesList');
+  if (!el || !list || !list.length) return;
+  el.innerHTML = list.slice(0, 5).map(a => {
+    let day = '28';
+    let month = 'Aug';
+    if (a.displayDate && a.displayDate.includes(' ')) {
+      const parts = a.displayDate.trim().split(/\s+/);
+      day = parts[0] || '28';
+      month = parts[1] || 'Aug';
+    } else if (a.displayDate && a.displayDate.includes('.')) {
+      const parts = a.displayDate.split('.');
+      day = parts[0] || '28';
+      month = 'Aug';
+    } else if (a.date) {
+      const dt = new Date(a.date);
+      if (!isNaN(dt.getTime())) {
+        day = String(dt.getDate()).padStart(2, '0');
+        month = dt.toLocaleString('en-US', { month: 'short' });
+      }
+    }
+    const cat = (a.category || '').toLowerCase();
+    const targetSubpage = cat.includes('training') || cat.includes('cpd') ? 'training' :
+                          cat.includes('event') || cat.includes('photo') ? 'gallery' : 'resources';
+    return `<a href="javascript:void(0)" onclick="openSubpage('${targetSubpage}')" class="update-item-row">
+      <div class="update-date-badge">
+        <span class="badge-day">${day}</span>
+        <span class="badge-month">${month}</span>
       </div>
-      <div class="ann-info">
-        <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
-          ${a.badge ? `<span class="card-badge">${a.badge}</span>` : ''}
-          <span style="font-size:.8rem;color:var(--accent-gold);font-weight:600">${a.category}</span>
-        </div>
-        <h4>${a.title}</h4>
-        <p>${a.description}</p>
-        ${a.linkUrl && a.linkUrl !== '#' ? `<a href="${a.linkUrl}" target="_blank" style="display:inline-block;margin-top:.6rem;color:var(--accent-blue);font-weight:600;font-size:.88rem">Access Circular <i class="fas fa-arrow-right"></i></a>` : ''}
-      </div>
-    </div>`;
+      <span class="update-title-text">${a.title}</span>
+      <i class="fas fa-arrow-right update-chevron"></i>
+    </a>`;
   }).join('');
 }
 
-/* ── Initiatives ─────────────────────────────────────────────── */
-function renderInitiatives(list) {
-  const navDropdown = document.getElementById('navInitiativesDropdown');
-  if (navDropdown && list) {
-    navDropdown.innerHTML = list.slice(0, 6).map(item => `
-      <a href="#initiatives" class="dropdown-link">
-        <i class="fas ${item.icon || 'fa-rocket'}" style="margin-right:.4rem;color:var(--accent-gold)"></i> ${item.title}
-      </a>
-    `).join('') + `<a href="#initiatives" class="dropdown-link" style="border-top:1px solid var(--border-color);font-weight:700">Explore All Initiatives <i class="fas fa-arrow-right"></i></a>`;
+function renderModalAbout(prof) {
+  if (!prof) return;
+  _setText('aboutBioFull', prof.bio);
+  _setText('aboutJourneyText', prof.journey);
+  _setText('aboutVisionText', prof.vision);
+
+  const qualEl = document.getElementById('aboutQualList');
+  if (qualEl && prof.qualifications) {
+    const items = prof.qualifications.split(/\n|,/).map(s => s.trim()).filter(Boolean);
+    qualEl.innerHTML = items.map(item => `<li>${item}</li>`).join('');
   }
 
-  const el = document.getElementById('initiativesContainer');
+  const rolesEl = document.getElementById('aboutRolesList');
+  if (rolesEl && prof.responsibilities) {
+    const items = prof.responsibilities.split(/\n/).map(s => s.trim()).filter(Boolean);
+    rolesEl.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+  }
+}
+
+function renderModalInitiatives(list) {
+  const el = document.getElementById('modalInitiativesGrid');
   if (!el || !list) return;
   el.innerHTML = list.map(i => {
     const isDrive = isDriveUrl(i.image);
     const driveId = isDrive ? getDriveId(i.image) : null;
-    const imgSrc = isDrive ? convertDriveUrl(i.image, 'image') : (i.image || 'assets/images/pm_shri.png');
-    return `<div class="card">
-      <div class="card-img-wrapper"><img src="${imgSrc}" class="card-img" alt="${i.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" loading="lazy"></div>
-      <div class="card-body">
-        <span class="card-badge"><i class="fas ${i.icon || 'fa-star'}"></i> ${i.category}</span>
-        <h3 class="card-title">${i.title}</h3>
-        <p class="card-text">${i.summary}</p>
-        <p style="font-size:.88rem;color:var(--text-muted);border-top:1px solid var(--border-color);padding-top:.8rem;margin-top:auto">${i.details}</p>
+    const imgSrc = isDrive ? convertDriveUrl(i.image, 'image') : (i.image || 'assets/images/toy_library.png');
+    return `<div class="card" style="display:flex;flex-direction:column">
+      <div class="card-img-wrapper" style="height:190px">
+        <img src="${imgSrc}" class="card-img" alt="${i.title}" onerror="handleDriveImgError(this, '${driveId || ''}')" loading="lazy">
+      </div>
+      <div class="card-body" style="flex:1;display:flex;flex-direction:column">
+        <span class="card-badge" style="align-self:flex-start;margin-bottom:0.6rem"><i class="fas ${i.icon || 'fa-star'}"></i> ${i.category}</span>
+        <h3 class="card-title" style="font-size:1.15rem;margin-bottom:0.5rem">${i.title}</h3>
+        <p class="card-text" style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.8rem">${i.summary}</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);border-top:1px solid var(--border-color);padding-top:0.8rem;margin-top:auto">${i.details}</p>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ── Staff Directory ──────────────────────────────────────────── */
-function renderStaffDirectory(list, q = '') {
-  const el = document.getElementById('staffTableBody');
-  if (!el || !list) return;
-  const f = list.filter(s =>
-    s.name.toLowerCase().includes(q.toLowerCase()) ||
-    s.designation.toLowerCase().includes(q.toLowerCase()) ||
-    s.department.toLowerCase().includes(q.toLowerCase())
+function renderModalResources(query = '') {
+  const el = document.getElementById('modalResourcesContainer');
+  if (!el) return;
+  const list = DB.getData().resources || [];
+  const filtered = list.filter(r =>
+    r.title.toLowerCase().includes(query.toLowerCase()) ||
+    r.category.toLowerCase().includes(query.toLowerCase())
   );
-  if (!f.length) { el.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem">No staff found.</td></tr>`; return; }
-  el.innerHTML = f.map(m => `<tr>
-    <td><strong>${m.name}</strong></td>
-    <td><span class="card-badge">${m.designation}</span></td>
-    <td>${m.department}</td>
-    <td>${m.qualification || 'N/A'}</td>
-    <td><a href="mailto:${m.email}" style="color:var(--accent-blue)"><i class="fas fa-envelope"></i> ${m.email}</a></td>
-  </tr>`).join('');
+  if (!filtered.length) {
+    el.innerHTML = `<p style="color:var(--text-muted);padding:1.5rem 0">No resources found matching your search.</p>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r => {
+    const hasSrc = r.srcUrl && r.srcUrl !== '#';
+    const isDrive = isDriveUrl(r.srcUrl);
+    return `<div class="card" style="padding:1.2rem;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;gap:1.2rem;align-items:center">
+        <div style="width:46px;height:46px;border-radius:10px;background:rgba(230,171,44,.15);color:#dfa83b;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div>
+          <span style="font-size:.78rem;color:var(--accent-teal);font-weight:700">${r.category} &bull; ${r.fileType || 'PDF'} (${r.size || 'PDF Document'})</span>
+          <h4 style="font-size:1.02rem;margin:0.2rem 0;color:var(--primary)">${r.title}</h4>
+          <span style="font-size:.8rem;color:var(--text-muted)">Published: ${r.date || 'Recent'}</span>
+        </div>
+      </div>
+      <div>
+        ${hasSrc
+          ? isDrive
+            ? `<button onclick="openViewer('${r.srcUrl}','${r.title.replace(/'/g,"\\'")}','','pdf')" class="btn-primary" style="padding:.5rem 1.1rem;font-size:.85rem"><i class="fas fa-eye"></i> View PDF</button>`
+            : `<a href="${r.srcUrl}" target="_blank" class="btn-primary" style="padding:.5rem 1.1rem;font-size:.85rem"><i class="fas fa-download"></i> Access</a>`
+          : `<button class="btn-secondary" style="padding:.5rem 1.1rem;font-size:.85rem;opacity:0.6" onclick="alert('Document link will be available shortly.')"><i class="fas fa-info-circle"></i> In Library</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
 }
 
-/* ── Gallery ──────────────────────────────────────────────────── */
-function renderGallery(list, cat = 'All') {
-  const container = document.getElementById('galleryFilterContainer');
-  const grid = document.getElementById('galleryGrid');
+function renderModalAnnouncements(list) {
+  const el = document.getElementById('modalAnnouncementsContainer');
+  if (!el) return;
+  if (!list || !list.length) {
+    el.innerHTML = `<p style="color:var(--text-muted);padding:1rem 0">No updates or training materials available yet.</p>`;
+    return;
+  }
+  el.innerHTML = list.map(a => {
+    return `<div class="announcement-card" style="margin-bottom:1rem">
+      <div class="ann-date-box">
+        <span class="ann-date-day">${a.displayDate || a.date || 'NEW'}</span>
+      </div>
+      <div class="ann-info">
+        <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.3rem">
+          ${a.badge ? `<span class="card-badge">${a.badge}</span>` : ''}
+          <span style="font-size:.8rem;color:var(--accent-gold);font-weight:600">${a.category || 'General'}</span>
+        </div>
+        <h4>${a.title}</h4>
+        <p>${a.description || ''}</p>
+        ${a.linkUrl && a.linkUrl !== '#' ? (
+          a.linkUrl.startsWith('#')
+            ? `<a href="javascript:void(0)" onclick="openSubpage('${a.linkUrl.replace('#','')}')" style="display:inline-block;margin-top:.6rem;color:var(--accent-blue);font-weight:600;font-size:.88rem">Explore Section <i class="fas fa-arrow-right"></i></a>`
+            : `<a href="${a.linkUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:.6rem;color:var(--accent-blue);font-weight:600;font-size:.88rem">Access Document <i class="fas fa-external-link-alt"></i></a>`
+        ) : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderModalGallery(list, cat = 'All') {
+  const filterEl = document.getElementById('modalGalleryFilters');
+  const gridEl = document.getElementById('modalGalleryGrid');
   if (!list) return;
 
-  // Dynamically build filter buttons if container exists
-  if (container) {
+  if (filterEl) {
     const rawCategories = list.map(i => i.category).filter(Boolean);
     const uniqueCats = ['All', ...new Set(rawCategories)];
-    container.innerHTML = uniqueCats.map(c => `
-      <button class="filter-btn ${c === cat ? 'active' : ''}" onclick="renderGallery(DB.getData().gallery, '${c}')">
+    filterEl.innerHTML = uniqueCats.map(c => `
+      <button class="filter-btn ${c === cat ? 'active' : ''}" onclick="renderModalGallery(DB.getData().gallery, '${c}')">
         ${c === 'All' ? 'All Photos' : c}
       </button>
     `).join('');
   }
 
-  if (!grid) return;
+  if (!gridEl) return;
   const items = cat === 'All' ? list : list.filter(i => i.category === cat);
-  grid.innerHTML = items.map(item => {
+  gridEl.innerHTML = items.map(item => {
     const isDrive = isDriveUrl(item.srcUrl);
     const driveId = isDrive ? getDriveId(item.srcUrl) : null;
     const src = isDrive ? convertDriveUrl(item.srcUrl, 'image') : (item.srcUrl || item.image || '');
@@ -483,38 +610,6 @@ function renderGallery(list, cat = 'All') {
         <span style="font-size:.75rem;color:var(--accent-gold);font-weight:700">${item.category}</span>
         <div class="gallery-caption">${item.title}</div>
       </div>
-    </div>`;
-  }).join('');
-}
-
-/* ── Resources ───────────────────────────────────────────────── */
-function renderResources(list, search = '') {
-  const el = document.getElementById('resourcesContainer');
-  if (!el || !list) return;
-  const f = list.filter(r =>
-    r.title.toLowerCase().includes(search.toLowerCase()) ||
-    r.category.toLowerCase().includes(search.toLowerCase())
-  );
-  el.innerHTML = f.map(r => {
-    const hasSrc = r.srcUrl && r.srcUrl !== '#';
-    const isDrive = isDriveUrl(r.srcUrl);
-    return `<div class="card" style="padding:1.5rem;flex-direction:row;align-items:center;justify-content:space-between;gap:1rem">
-      <div style="display:flex;gap:1.2rem;align-items:center">
-        <div style="width:50px;height:50px;border-radius:var(--radius-sm);background:rgba(230,171,44,.15);color:var(--accent-gold-hover);display:flex;align-items:center;justify-content:center;font-size:1.5rem">
-          <i class="fas fa-file-pdf"></i>
-        </div>
-        <div>
-          <span style="font-size:.75rem;color:var(--accent-teal);font-weight:700">${r.category} • ${r.fileType} (${r.size})</span>
-          <h4 style="font-size:1.05rem;margin-top:.2rem">${r.title}</h4>
-          <span style="font-size:.8rem;color:var(--text-muted)">Published: ${r.date}</span>
-        </div>
-      </div>
-      ${hasSrc
-        ? isDrive
-          ? `<button onclick="openViewer('${r.srcUrl}','${r.title}','','pdf')" class="btn-primary" style="padding:.6rem 1.2rem;font-size:.88rem;white-space:nowrap"><i class="fas fa-eye"></i> View PDF</button>`
-          : `<a href="${r.srcUrl}" target="_blank" class="btn-primary" style="padding:.6rem 1.2rem;font-size:.88rem;white-space:nowrap"><i class="fas fa-download"></i> Download</a>`
-        : `<button class="btn-secondary" disabled style="padding:.6rem 1.2rem;font-size:.88rem;opacity:.5;cursor:not-allowed"><i class="fas fa-link-slash"></i> No Link</button>`
-      }
     </div>`;
   }).join('');
 }
@@ -544,6 +639,7 @@ function openViewer(rawUrl, title, caption, type) {
   }
   modal.classList.add('active');
 }
+
 function closeViewer() {
   const modal = document.getElementById('viewerModal');
   if (modal) {
@@ -553,25 +649,28 @@ function closeViewer() {
   }
 }
 
-/* ── Contact Form ─────────────────────────────────────────────── */
+/* ── Contact Form Submission ──────────────────────────────────── */
 async function handlePublicContactSubmit(e) {
   e.preventDefault();
-  const schoolName = DB.getData().schoolInfo?.name || 'Vidyalaya';
   const inq = {
+    id:      'inq-' + Date.now(),
     name:    document.getElementById('contactName').value.trim(),
     email:   document.getElementById('contactEmail').value.trim(),
-    phone:   document.getElementById('contactPhone').value.trim(),
-    subject: document.getElementById('contactSubject').value.trim(),
-    message: document.getElementById('contactMessage').value.trim()
+    phone:   (document.getElementById('contactPhone')?.value || '').trim(),
+    subject: (document.getElementById('contactSubject')?.value || 'Portfolio Inquiry').trim(),
+    message: document.getElementById('contactMessage').value.trim(),
+    status:  'NEW',
+    date:    new Date().toLocaleDateString('en-GB')
   };
   await DB.submitInquiry(inq);
   e.target.reset();
-  alert(`Thank you! Your inquiry has been submitted to ${schoolName} administration.`);
+  alert('Thank you! Your message has been sent to Vijay Kumar, Headmaster.');
+  closeSubpage();
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ADMIN PANEL — Part B
-═══════════════════════════════════════════════════════════════ */
+   ADMIN PANEL — CMS Part B
+   ═══════════════════════════════════════════════════════════════ */
 
 /* ── Tab Switcher ─────────────────────────────────────────────── */
 function switchAdminTab(name) {
@@ -583,296 +682,175 @@ function switchAdminTab(name) {
   if (panel) panel.style.display = 'block';
 }
 
-/* ── Dashboard Overview Stats ─────────────────────────────────── */
+/* ── Dashboard Overview Stats & Profile ──────────────────────── */
 function renderAdminDashboard() {
   const d = DB.getData();
-  _setNum('adminStatAnnouncements', d.announcements.length);
-  _setNum('adminStatStaff',         d.staff.length);
-  _setNum('adminStatGallery',       d.gallery.length);
-  _setNum('adminStatResources',     d.resources.length);
-  _setNum('adminStatInquiries',     d.inquiries.length);
+  _setNum('adminStatAnnouncements', d.announcements?.length || 0);
+  _setNum('adminStatResources',     d.resources?.length || 0);
+  _setNum('adminStatInitiatives',   d.initiatives?.length || 0);
+  _setNum('adminStatGallery',       d.gallery?.length || 0);
+  _setNum('adminStatInquiries',     d.inquiries?.length || 0);
 
   const user = Auth.getUser();
   _setText('adminUserDisplay', user ? user.displayName : 'Administrator');
-  _setText('adminWorkplaceDisplay', `Current Workplace: ${d.schoolInfo.shortName || d.schoolInfo.name}`);
+  _setText('adminWorkplaceDisplay', `Headmaster: ${d.profile?.name || 'Vijay Kumar'} • ${d.profile?.school || 'PM SHRI KV Suranussi'}`);
 
-  renderAdminAnnouncementsList(d.announcements);
-  renderAdminStaffList(d.staff);
-  renderAdminInquiriesList(d.inquiries);
-  renderAdminGalleryList(d.gallery);
-  renderAdminResourcesList(d.resources);
-  populateSchoolInfoForm(d.schoolInfo);
-  populateHeroStatsForm(d.heroSection, d.statsBar);
-  populatePrincipalForm(d.principalMessage);
-  renderAdminInitiativesList(d.initiatives);
+  populateProfileForm(d.profile);
+  renderAdminMenusList(d.menus || []);
+  renderAdminAnnouncementsList(d.announcements || []);
+  renderAdminResourcesList(d.resources || []);
+  renderAdminInitiativesList(d.initiatives || []);
+  renderAdminGalleryList(d.gallery || []);
+  renderAdminInquiriesList(d.inquiries || []);
   refreshCategoryDropdowns();
   populateSupabaseConfigUI();
 }
-function _setNum(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
-function _setChecked(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
-function _setVal(id, val) { const el = document.getElementById(id); if (el) el.value = (val !== undefined && val !== null) ? val : ''; }
 
-/* ── Campus & Hero Photo Selection Helpers ───────────────────── */
-function selectCampusPhotoType(type) {
-  const inp = document.getElementById('siCampusImage');
-  if (!inp) return;
-  if (type === 'kv') {
-    inp.value = 'assets/images/kv_campus.jpg';
-  } else if (type === 'pmshri') {
-    inp.value = 'assets/images/hero.png';
-  } else if (type === 'custom') {
-    if (inp.value === 'assets/images/kv_campus.jpg' || inp.value === 'assets/images/hero.png') {
-      inp.value = '';
-    }
-    inp.focus();
-  }
-  previewDriveInput('siCampusImage', 'siCampusImgPrev');
+function populateProfileForm(prof) {
+  if (!prof) return;
+  _setVal('profName',           prof.name);
+  _setVal('profRole',           prof.role);
+  _setVal('profSchool',         prof.school);
+  _setVal('profStage',          prof.stage);
+  _setVal('profMotto',          prof.motto);
+  _setVal('profBio',            prof.bio);
+  _setVal('profQuote',          prof.quote);
+  _setVal('profQualifications', prof.qualifications);
+  _setVal('profRoles',          prof.responsibilities);
+  _setVal('profJourney',        prof.journey);
+  _setVal('profVision',         prof.vision);
+  _setVal('profEmail',          prof.email);
+  _setVal('profPhone',          prof.phone);
+  _setVal('profAddress',        prof.address);
+  _setVal('profFacebook',       prof.facebook || 'https://facebook.com');
+  _setVal('profYoutube',        prof.youtube || 'https://youtube.com');
+  _setVal('profInstagram',      prof.instagram || 'https://instagram.com');
 }
 
-function detectCampusPhotoType(val) {
-  val = (val || '').trim();
-  if (val === 'assets/images/kv_campus.jpg') {
-    _setChecked('optCampusKv', true);
-  } else if (val === 'assets/images/hero.png') {
-    _setChecked('optCampusPmShri', true);
-  } else {
-    _setChecked('optCampusCustom', true);
-  }
-}
-
-function selectHeroPhotoType(type) {
-  const inp = document.getElementById('heroBgImage');
-  if (!inp) return;
-  if (type === 'kv') {
-    inp.value = 'assets/images/kv_campus.jpg';
-  } else if (type === 'pmshri') {
-    inp.value = 'assets/images/hero.png';
-  } else if (type === 'custom') {
-    if (inp.value === 'assets/images/kv_campus.jpg' || inp.value === 'assets/images/hero.png') {
-      inp.value = '';
-    }
-    inp.focus();
-  }
-  previewDriveInput('heroBgImage', 'heroBgPrev');
-}
-
-function detectHeroPhotoType(val) {
-  val = (val || '').trim();
-  if (val === 'assets/images/kv_campus.jpg') {
-    _setChecked('optHeroKv', true);
-  } else if (val === 'assets/images/hero.png') {
-    _setChecked('optHeroPmShri', true);
-  } else {
-    _setChecked('optHeroCustom', true);
-  }
-}
-
-/* ── Tab: School Info & Workplace Profile ─────────────────────── */
-function populateSchoolInfoForm(info) {
-  if (!info) return;
-  _setVal('siName',         info.name);
-  _setVal('siShortName',    info.shortName || '');
-  _setVal('siAffiliation',  info.affiliation);
-  _setVal('siSector',       info.sector || '');
-  _setVal('siRegion',       info.region || '');
-  _setVal('siEstablished',  info.established || '');
-  _setVal('siBadgeText',    info.badgeText || '');
-  _setVal('siTagline',      info.tagline);
-  _setVal('siSubtitle',     info.subtitle || '');
-  _setVal('siCampusImage',  info.campusImage || '');
-  _setVal('siAddress',      info.address);
-  _setVal('siPhone',        info.phone);
-  _setVal('siEmail',        info.email);
-  _setVal('siWorkingHours', info.workingHours || '');
-  _setVal('siHistory',      info.history);
-  _setVal('siVision',       info.vision);
-  _setVal('siMission',      info.mission);
-  _setVal('siFooterDesc',   info.footerDescription || '');
-
-  // Website Managed By Attribution inputs
-  const mb = info.managedBy || { name: 'Vijay Kumar', designation: 'HM', kvName: 'PM SHRI KV Suranussi', show: true };
-  _setVal('mbName',         mb.name || 'Vijay Kumar');
-  _setVal('mbDesignation',  mb.designation || 'HM');
-  _setVal('mbKvName',       mb.kvName || info.shortName || info.name || 'PM SHRI KV Suranussi');
-  _setVal('siMbName',       mb.name || 'Vijay Kumar');
-  _setVal('siMbDesignation',mb.designation || 'HM');
-  _setVal('siMbKvName',     mb.kvName || info.shortName || info.name || 'PM SHRI KV Suranussi');
-  const mbShowCb = document.getElementById('mbShow');
-  if (mbShowCb) mbShowCb.checked = mb.show !== false;
-
-  const pmCheckbox = document.getElementById('siIsPmShri');
-  if (pmCheckbox) pmCheckbox.checked = info.isPmShri !== false;
-
-  const showBadgeCheck = document.getElementById('siShowBadge');
-  if (showBadgeCheck) showBadgeCheck.checked = info.showBadge !== false;
-
-  detectCampusPhotoType(info.campusImage || 'assets/images/kv_campus.jpg');
-  previewDriveInput('siCampusImage', 'siCampusImgPrev');
-}
-
-function handleSaveSchoolInfo(e) {
+function handleSaveProfile(e) {
   e.preventDefault();
-  const data = DB.getData();
-  const isPm = document.getElementById('siIsPmShri')?.checked ?? true;
-  const showBadge = document.getElementById('siShowBadge')?.checked ?? true;
+  const d = DB.getData();
+  if (!d.profile) d.profile = {};
 
-  const mbNameVal  = (document.getElementById('siMbName')?.value || data.schoolInfo?.managedBy?.name || 'Vijay Kumar').trim();
-  const mbDesigVal = (document.getElementById('siMbDesignation')?.value || data.schoolInfo?.managedBy?.designation || 'HM').trim();
-  const mbKvVal    = (document.getElementById('siMbKvName')?.value || data.schoolInfo?.managedBy?.kvName || 'PM SHRI KV Suranussi').trim();
+  d.profile.name             = document.getElementById('profName').value.trim();
+  d.profile.role             = document.getElementById('profRole').value.trim();
+  d.profile.school           = document.getElementById('profSchool').value.trim();
+  d.profile.stage            = document.getElementById('profStage').value.trim();
+  d.profile.motto            = document.getElementById('profMotto').value.trim();
+  d.profile.bio              = document.getElementById('profBio').value.trim();
+  d.profile.quote            = document.getElementById('profQuote').value.trim();
+  d.profile.qualifications   = document.getElementById('profQualifications').value.trim();
+  d.profile.responsibilities = document.getElementById('profRoles').value.trim();
+  d.profile.journey          = document.getElementById('profJourney').value.trim();
+  d.profile.vision           = document.getElementById('profVision').value.trim();
+  d.profile.email            = document.getElementById('profEmail').value.trim();
+  d.profile.phone            = document.getElementById('profPhone').value.trim();
+  d.profile.address          = document.getElementById('profAddress').value.trim();
+  d.profile.facebook         = document.getElementById('profFacebook').value.trim() || 'https://facebook.com';
+  d.profile.youtube          = document.getElementById('profYoutube').value.trim() || 'https://youtube.com';
+  d.profile.instagram        = document.getElementById('profInstagram').value.trim() || 'https://instagram.com';
 
-  data.schoolInfo = {
-    ...data.schoolInfo,
-    name:              document.getElementById('siName').value,
-    shortName:         document.getElementById('siShortName').value,
-    isPmShri:          isPm,
-    schoolType:        isPm ? 'PM SHRI Kendriya Vidyalaya' : 'Normal Kendriya Vidyalaya',
-    affiliation:       document.getElementById('siAffiliation').value,
-    sector:            document.getElementById('siSector').value,
-    region:            document.getElementById('siRegion').value,
-    station:           document.getElementById('siAddress').value,
-    established:       document.getElementById('siEstablished').value,
-    badgeText:         document.getElementById('siBadgeText').value,
-    showBadge:         showBadge,
-    tagline:           document.getElementById('siTagline').value,
-    subtitle:          document.getElementById('siSubtitle').value,
-    campusImage:       document.getElementById('siCampusImage')?.value || 'assets/images/kv_campus.jpg',
-    address:           document.getElementById('siAddress').value,
-    phone:             document.getElementById('siPhone').value,
-    email:             document.getElementById('siEmail').value,
-    workingHours:      document.getElementById('siWorkingHours').value,
-    history:           document.getElementById('siHistory').value,
-    vision:            document.getElementById('siVision').value,
-    mission:           document.getElementById('siMission').value,
-    footerDescription: document.getElementById('siFooterDesc').value,
-    managedBy: {
-      name:        mbNameVal,
-      designation: mbDesigVal,
-      kvName:      mbKvVal,
-      show:        data.schoolInfo?.managedBy?.show !== false
-    }
-  };
-
-  // Sync to Settings tab inputs as well
-  _setVal('mbName', mbNameVal);
-  _setVal('mbDesignation', mbDesigVal);
-  _setVal('mbKvName', mbKvVal);
-
-  DB.saveData(data);
-  _toast('Workplace & School info saved successfully!');
+  DB.saveData(d);
+  renderAllSections();
+  _toast('Profile and social media links saved successfully!');
 }
 
-function togglePmShriOptions(isPm) {
-  const badgeInput = document.getElementById('siBadgeText');
-  if (badgeInput) {
-    if (isPm && (!badgeInput.value || badgeInput.value.includes('KENDRIYA VIDYALAYA SANGATHAN'))) {
-      badgeInput.value = 'PM SHRI CENTER OF EDUCATIONAL EXCELLENCE';
-    } else if (!isPm && (!badgeInput.value || badgeInput.value.includes('PM SHRI'))) {
-      badgeInput.value = 'KENDRIYA VIDYALAYA SANGATHAN • CENTER OF EXCELLENCE';
-    }
+/* ── Tab: Navigation Menus ────────────────────────────────────── */
+function renderAdminMenusList(menus) {
+  const tbody = document.getElementById('adminMenusTableBody');
+  if (!tbody) return;
+  if (!menus || !Array.isArray(menus) || !menus.length) {
+    const d = DB.getData();
+    menus = d.menus || (typeof DEFAULT_SEED_DATA !== 'undefined' ? DEFAULT_SEED_DATA.menus : []);
+  }
+  if (!menus || !menus.length) return;
+
+  tbody.innerHTML = menus.map(m => `
+    <tr style="border-bottom:1px solid var(--border-color);">
+      <td style="padding:0.75rem 1rem;">
+        <span style="font-family:monospace;font-size:0.82rem;background:var(--bg-card);padding:0.25rem 0.6rem;border-radius:4px;border:1px solid var(--border-color);color:var(--accent-gold);font-weight:700">
+          ${m.href}
+        </span>
+      </td>
+      <td style="padding:0.75rem 1rem;">
+        <input type="text" id="menuLabelInput_${m.id}" class="form-control" data-id="${m.id}" value="${_escapeHtml(m.label)}" placeholder="${m.defaultLabel || m.label}" oninput="syncCardTitleInput('${m.id}')" required style="font-weight:600;">
+      </td>
+      <td style="padding:0.75rem 1rem;">
+        <input type="text" id="cardTitleInput_${m.id}" class="form-control" data-id="${m.id}" value="${_escapeHtml(m.cardTitle || m.label)}" placeholder="${m.cardTitle || m.label}" oninput="this.dataset.userEdited='true'" style="font-weight:600;">
+      </td>
+      <td style="padding:0.75rem 1rem;">
+        <input type="text" id="cardDescInput_${m.id}" class="form-control" data-id="${m.id}" value="${_escapeHtml(m.cardDesc || '')}" placeholder="Optional subtitle / badge text" style="font-size:0.85rem;">
+      </td>
+      <td style="padding:0.75rem 1rem;text-align:center;">
+        <button type="button" class="btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.8rem" onclick="resetSingleMenu('${m.id}')" title="Reset to original">
+          <i class="fas fa-undo"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function syncCardTitleInput(id) {
+  const navInp = document.getElementById(`menuLabelInput_${id}`);
+  const cardTitleInp = document.getElementById(`cardTitleInput_${id}`);
+  if (navInp && cardTitleInp && !cardTitleInp.dataset.userEdited) {
+    cardTitleInp.value = navInp.value;
   }
 }
 
-function applyWorkplaceTransferPreset() {
-  const sector = document.getElementById('siSector')?.value.trim() || 'Defense Sector';
-  const region = document.getElementById('siRegion')?.value.trim() || 'Jalandhar Region';
-  const est = document.getElementById('siEstablished')?.value.trim() || '1979';
-  const aff = document.getElementById('siAffiliation')?.value.trim() || 'CBSE Affiliation No: 1600012';
-  const isPm = document.getElementById('siIsPmShri')?.checked ?? true;
-
-  const autoSubtitle = `A premier ${sector} Kendriya Vidyalaya in ${region}`;
-  const autoTagline = `${sector} • Est. ${est} • ${aff}`;
-  
-  _setVal('siSubtitle', autoSubtitle);
-  _setVal('siTagline', autoTagline);
-  togglePmShriOptions(isPm);
-
-  _toast('Tagline & Subtitle auto-generated from school profile!', 'success');
+function resetSingleMenu(id) {
+  const def = typeof DEFAULT_SEED_DATA !== 'undefined' ? DEFAULT_SEED_DATA.menus.find(x => x.id === id) : null;
+  if (def) {
+    const navInp = document.getElementById(`menuLabelInput_${id}`);
+    if (navInp) navInp.value = def.defaultLabel || def.label;
+    const cardTitleInp = document.getElementById(`cardTitleInput_${id}`);
+    if (cardTitleInp) {
+      cardTitleInp.value = def.cardTitle || def.label;
+      delete cardTitleInp.dataset.userEdited;
+    }
+    const cardDescInp = document.getElementById(`cardDescInput_${id}`);
+    if (cardDescInp) cardDescInp.value = def.cardDesc || '';
+  }
 }
 
-/* ── Tab: Hero & Stats ────────────────────────────────────────── */
-function populateHeroStatsForm(hero, stats) {
-  // Always fall back to seed defaults so the form is never empty
-  hero  = hero  || DEFAULT_SEED_DATA.heroSection;
-  stats = stats || DEFAULT_SEED_DATA.statsBar;
+function handleSaveMenus(e) {
+  if (e) e.preventDefault();
+  const d = DB.getData();
+  if (!d.menus || !d.menus.length) {
+    d.menus = JSON.parse(JSON.stringify(DEFAULT_SEED_DATA.menus));
+  }
 
-  _setVal('heroBadge', hero.badge);
-  _setVal('heroTitle',  hero.title);
-  _setVal('heroDesc',   hero.description);
-  _setVal('heroBgImage', hero.backgroundImage || '');
-  detectHeroPhotoType(hero.backgroundImage || 'assets/images/kv_campus.jpg');
-  previewDriveInput('heroBgImage', 'heroBgPrev');
+  d.menus = d.menus.map(item => {
+    const navInp = document.getElementById(`menuLabelInput_${item.id}`);
+    const cardTitleInp = document.getElementById(`cardTitleInput_${item.id}`);
+    const cardDescInp = document.getElementById(`cardDescInput_${item.id}`);
 
-  const container = document.getElementById('statsEditorList');
-  if (!container || !Array.isArray(stats)) return;
-  container.innerHTML = stats.map((s, i) => `
-    <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:.8rem;align-items:center;margin-bottom:.8rem">
-      <input type="text" class="form-control" value="${s.value}" placeholder="e.g. 1500+" id="statVal_${i}">
-      <input type="text" class="form-control" value="${s.label}" placeholder="e.g. Active Students" id="statLbl_${i}">
-      <button type="button" onclick="removeStatRow(${i})" style="background:var(--accent-crimson);color:#fff;padding:.5rem .8rem;border-radius:var(--radius-sm);border:none;cursor:pointer;flex-shrink:0"><i class="fas fa-trash"></i></button>
-    </div>`).join('');
-}
+    const navVal = navInp ? navInp.value.trim() : item.label;
+    const cardTitleVal = cardTitleInp ? cardTitleInp.value.trim() : '';
+    const cardDescVal = cardDescInp ? cardDescInp.value.trim() : '';
 
-function handleSaveHeroStats(e) {
-  e.preventDefault();
-  const data = DB.getData();
-  data.heroSection = {
-    badge:           document.getElementById('heroBadge').value,
-    title:           document.getElementById('heroTitle').value,
-    description:     document.getElementById('heroDesc').value,
-    backgroundImage: document.getElementById('heroBgImage')?.value || 'assets/images/kv_campus.jpg',
-  };
-  const rows = document.querySelectorAll('#statsEditorList > div');
-  data.statsBar = Array.from(rows).map(row => {
-    const inputs = row.querySelectorAll('input');
     return {
-      value: inputs[0] ? inputs[0].value.trim() : '',
-      label: inputs[1] ? inputs[1].value.trim() : '',
+      ...item,
+      label: navVal || item.defaultLabel || item.label,
+      cardTitle: cardTitleVal || navVal || item.cardTitle || item.label,
+      cardDesc: cardDescVal || item.cardDesc || ''
     };
-  }).filter(s => s.value || s.label);
-  DB.saveData(data);
-  _toast('Hero section & stats saved!');
+  });
+
+  DB.saveData(d);
+  renderNavigationMenus(d.menus);
+  renderAdminMenusList(d.menus);
+  _toast('Navigation menus & linked cards saved successfully!');
 }
 
-function addStatRow() {
-  const c = document.getElementById('statsEditorList');
-  if (!c) return;
-  const i = c.children.length;
-  const div = document.createElement('div');
-  div.style.cssText = 'display:grid;grid-template-columns:1fr 2fr auto;gap:.8rem;align-items:center;margin-bottom:.8rem';
-  div.innerHTML = `
-    <input type="text" class="form-control" placeholder="e.g. 200+" id="statVal_${i}">
-    <input type="text" class="form-control" placeholder="e.g. New Stat"  id="statLbl_${i}">
-    <button type="button" onclick="this.parentElement.remove()" style="background:var(--accent-crimson);color:#fff;padding:.5rem .8rem;border-radius:var(--radius-sm);border:none;cursor:pointer"><i class="fas fa-trash"></i></button>`;
-  c.appendChild(div);
-}
-
-function removeStatRow(i) {
-  const el = document.querySelectorAll('#statsEditorList > div')[i];
-  if (el) el.remove();
-}
-
-/* ── Tab: Principal ───────────────────────────────────────────── */
-function populatePrincipalForm(p) {
-  if (!p) return;
-  _setVal('pName',    p.name);
-  _setVal('pTitle',   p.title);
-  _setVal('pImage',   p.image);
-  _setVal('pQuote',   p.quote);
-  _setVal('pContent', p.content);
-}
-function handleSavePrincipal(e) {
-  e.preventDefault();
-  const data = DB.getData();
-  data.principalMessage = {
-    ...data.principalMessage,
-    name:    document.getElementById('pName').value,
-    title:   document.getElementById('pTitle').value,
-    image:   document.getElementById('pImage').value,
-    quote:   document.getElementById('pQuote').value,
-    content: document.getElementById('pContent').value,
-  };
-  DB.saveData(data);
-  _toast('Principal information saved!');
+function handleResetMenus() {
+  if (!confirm('Are you sure you want to reset all navigation menu names and card titles to their defaults?')) return;
+  const d = DB.getData();
+  d.menus = JSON.parse(JSON.stringify(DEFAULT_SEED_DATA.menus));
+  DB.saveData(d);
+  renderNavigationMenus(d.menus);
+  renderAdminMenusList(d.menus);
+  _toast('Navigation menu names and cards reset to defaults.');
 }
 
 /* ── Tab: Initiatives ─────────────────────────────────────────── */
@@ -949,9 +927,9 @@ function deleteInitiative(id) {
 
 /* ── Category Management Helpers ─────────────────────────────── */
 const DEFAULT_CATEGORIES = {
-  gal: ['PM SHRI', 'FLN & Activities', 'Campus', 'Events', 'Sports', 'Balvatika & Toy Pedagogy', 'CCA & Cultural', 'Science & Innovation'],
-  res: ['Curriculum', 'Question Banks', 'Newsletters', 'Admissions', 'Circulars', 'Reports', 'Study Material', 'Syllabus'],
-  newAnn: ['Training', 'Workshops', 'Pedagogy', 'FLN / NIPUN', 'Curriculum', 'Circular', 'Inclusive Education', 'Admissions', 'Examinations']
+  gal: ['Events & Celebrations', 'Awards & Certificates', 'Classroom & FLN Moments', 'Toy Pedagogy & Workshops', 'Student Showcases'],
+  res: ['Worksheets', 'Lesson Plans', 'CCT & HOTS Question Banks', 'Assessment Tools', 'Phonics & FLN Aids', 'Teacher Handbooks'],
+  newAnn: ['Assessment', 'Training & CPD', 'Teaching Resources', 'FLN & NIPUN', 'Pedagogy', 'School Events', 'Workshops']
 };
 
 function refreshCategoryDropdowns() {
@@ -1183,43 +1161,6 @@ function deleteAnnouncement(id) {
   refreshCategoryDropdowns();
 }
 
-/* ── Tab: Staff ───────────────────────────────────────────────── */
-function renderAdminStaffList(list) {
-  const el = document.getElementById('adminStaffList');
-  if (!el) return;
-  el.innerHTML = list.map(s => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border-color)">
-      <div>
-        <strong>${s.name}</strong> (${s.designation})
-        <p style="font-size:.85rem;color:var(--text-muted)">${s.department} • ${s.email}</p>
-      </div>
-      <button onclick="deleteStaff('${s.id}')" style="background:var(--accent-crimson);color:#fff;padding:.4rem .8rem;border-radius:var(--radius-sm);border:none;cursor:pointer">
-        <i class="fas fa-trash"></i> Remove
-      </button>
-    </div>`).join('');
-}
-function handleAddStaff(e) {
-  e.preventDefault();
-  const data = DB.getData();
-  data.staff.push({
-    id:            'st-' + Date.now(),
-    name:          document.getElementById('newStaffName').value,
-    designation:   document.getElementById('newStaffDesignation').value,
-    department:    document.getElementById('newStaffDept').value,
-    qualification: document.getElementById('newStaffQual').value,
-    email:         document.getElementById('newStaffEmail').value,
-  });
-  DB.saveData(data);
-  e.target.reset();
-  _toast('Staff profile added!');
-}
-function deleteStaff(id) {
-  if (!confirm('Remove this staff profile?')) return;
-  const data = DB.getData();
-  data.staff = data.staff.filter(s => s.id !== id);
-  DB.saveData(data);
-}
-
 /* ── Tab: Inquiries ───────────────────────────────────────────── */
 function renderAdminInquiriesList(list) {
   const el = document.getElementById('adminInquiriesList');
@@ -1253,32 +1194,6 @@ function deleteInquiry(id) {
   const data = DB.getData();
   data.inquiries = data.inquiries.filter(i => i.id !== id);
   DB.saveData(data);
-}
-
-/* ── Tab: Settings / Webmaster Attribution ─────────────────── */
-function handleSaveManagedBy(e) {
-  e.preventDefault();
-  const data = DB.getData();
-  if (!data.schoolInfo) data.schoolInfo = {};
-  const nameVal  = document.getElementById('mbName').value.trim();
-  const desigVal = document.getElementById('mbDesignation').value.trim();
-  const kvVal    = document.getElementById('mbKvName').value.trim();
-  const showVal  = document.getElementById('mbShow').checked;
-
-  data.schoolInfo.managedBy = {
-    name:        nameVal,
-    designation: desigVal,
-    kvName:      kvVal,
-    show:        showVal
-  };
-
-  // Sync to School Info tab inputs
-  _setVal('siMbName', nameVal);
-  _setVal('siMbDesignation', desigVal);
-  _setVal('siMbKvName', kvVal);
-
-  DB.saveData(data);
-  _toast('Website Manager attribution saved!');
 }
 
 /* ── Tab: Settings / Password Change ─────────────────────────── */
@@ -1415,7 +1330,7 @@ async function handlePullFromCloud(e) {
 /* ── Export / Reset ───────────────────────────────────────────── */
 function exportAppData() {
   const d = DB.getData();
-  const cleanName = (d.schoolInfo?.shortName || d.schoolInfo?.name || 'KV_Portal')
+  const cleanName = (d.profile?.name || 'vijaysirkvs')
     .replace(/[^a-zA-Z0-9_-]/g, '_')
     .substring(0, 30);
   const blob = new Blob([DB.exportJSON()], { type: 'application/json' });
